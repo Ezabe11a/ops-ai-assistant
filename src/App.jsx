@@ -20,6 +20,10 @@ export default function App() {
   const [input, setInput] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const bottomRef = useRef(null)
+  const messageListRef = useRef(null)
+  const shouldAutoScrollRef = useRef(true)
+  const isComposingRef = useRef(false)
+  const justEndedCompositionRef = useRef(false)
 
   const currentSession = sessions.find(s => s.id === currentId)
 
@@ -58,11 +62,21 @@ export default function App() {
 
   // 收到新消息时自动滚动到底部
   useEffect(() => {
+    if (!shouldAutoScrollRef.current) return
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const handleMessageListScroll = () => {
+    const el = messageListRef.current
+    if (!el) return
+    const thresholdPx = 24
+    const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    shouldAutoScrollRef.current = distanceToBottom <= thresholdPx
+  }
+
   // 新建会话
   const handleNew = () => {
+    shouldAutoScrollRef.current = true
     const newSession = { id: genId(), title: '新对话', messages: [] }
     const updated = [newSession, ...sessions]
     setSessions(updated)
@@ -74,6 +88,7 @@ export default function App() {
   // 切换会话
   const handleSelect = (id) => {
     if (id === currentId) return
+    shouldAutoScrollRef.current = true
     const session = sessions.find(s => s.id === id)
     setCurrentId(id)
     setMessages(session?.messages || [])
@@ -98,6 +113,7 @@ export default function App() {
     if (!currentId) {
       handleNew()
     }
+    shouldAutoScrollRef.current = true
     sendMessage(input.trim())
     setInput('')
   }
@@ -105,6 +121,17 @@ export default function App() {
   // 处理键盘事件（回车发送，Shift+Enter 换行）
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      // 中文输入法等组合输入期间，Enter 用于“选词/上屏”，不应触发发送
+      // 某些浏览器会在 compositionend 之后立刻触发一次 keydown(Enter)，这里做一次短暂兜底
+      if (
+        justEndedCompositionRef.current ||
+        isComposingRef.current ||
+        e.isComposing ||
+        e.nativeEvent?.isComposing ||
+        e.keyCode === 229
+      ) {
+        return
+      }
       e.preventDefault()
       handleSend()
     }
@@ -136,6 +163,18 @@ export default function App() {
         handleKeyDown={handleKeyDown}
         stopGenerate={stopGenerate}
         bottomRef={bottomRef}
+        messageListRef={messageListRef}
+        onMessageListScroll={handleMessageListScroll}
+        onCompositionStart={() => {
+          isComposingRef.current = true
+        }}
+        onCompositionEnd={() => {
+          isComposingRef.current = false
+          justEndedCompositionRef.current = true
+          setTimeout(() => {
+            justEndedCompositionRef.current = false
+          }, 0)
+        }}
       />
     </div>
   )

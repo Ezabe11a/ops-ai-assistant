@@ -17,7 +17,11 @@ export default function ChatWindow({
   handleSend,
   handleKeyDown,
   stopGenerate,
-  bottomRef
+  bottomRef,
+  messageListRef,
+  onMessageListScroll,
+  onCompositionStart,
+  onCompositionEnd
 }) {
   return (
     <div className="chat-window-container">
@@ -27,7 +31,7 @@ export default function ChatWindow({
       </div>
 
       {/* 消息列表区域 */}
-      <div className="message-list">
+      <div className="message-list" ref={messageListRef} onScroll={onMessageListScroll}>
         {/* 空状态展示 */}
         {messages.length === 0 && (
           <div className="empty-state">
@@ -61,6 +65,8 @@ export default function ChatWindow({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onCompositionStart={onCompositionStart}
+            onCompositionEnd={onCompositionEnd}
             placeholder="输入消息..."
             rows={1}
             className="chat-textarea"
