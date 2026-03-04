@@ -1,0 +1,173 @@
+.message-item-container {
+  display: flex;
+  flex-direction: column;
+  margin: 24px 0;
+  padding: 0 16px;
+  max-width: 48rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.message-item-container.user {
+  align-items: flex-end;
+}
+
+.message-item-container.assistant {
+  align-items: flex-start;
+}
+
+.message-content-wrapper {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.message-content-wrapper.user {
+  flex-direction: row-reverse;
+}
+
+.message-content-wrapper.assistant {
+  flex-direction: row;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.avatar.user {
+  background: #da7756;
+}
+
+.avatar.assistant {
+  background: #d95a3c;
+}
+
+.message-body {
+  flex: 1;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.sender-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.sender-name.user {
+  text-align: right;
+}
+
+.sender-name.assistant {
+  text-align: left;
+}
+
+.message-text {
+  color: #2d2d2d;
+  border-radius: 8px;
+  line-height: 1.7;
+  word-break: break-word;
+  font-size: 16px;
+  font-family: "Söhne", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.message-text.user {
+  background: #f4f4f4;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+}
+
+.message-text.assistant {
+  background: transparent;
+  padding: 0;
+  white-space: normal;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  opacity: 0.6;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: #666;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn:hover {
+  background: #f0f0f0;
+}
+
+.action-btn.active {
+  background: #e6f4ff;
+  color: #1677ff;
+}
+
+.action-btn.active:hover {
+  background: #d9edff;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Markdown Styles */
+.markdown-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.markdown-th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  background: #f9f9f9;
+  font-weight: 600;
+}
+
+.markdown-td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.code-block-wrapper {
+  background: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.code-block {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 14px;
+}
+
+.inline-code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 14px;
+  color: #eb5757;
+}

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import Sidebar from './components/Sidebar'
-import ChatWindow from './components/ChatWindow'
+import Sidebar from './components/Sidebar/index.jsx'
+import ChatWindow from './components/ChatWindow/index.jsx'
 import useChat from './hooks/useChat'
 import { genId, loadSessions, saveSessions } from './utils/index'
+import './App.css'
 
 /**
  * 应用主入口组件
@@ -110,8 +111,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-
+    <div className="app-container">
       {/* 左侧历史会话栏 */}
       <Sidebar
         sessions={sessions}

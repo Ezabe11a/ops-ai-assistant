@@ -69,22 +69,29 @@ npm run build
 
 ```
 src/
-├── components/        # UI 组件
-│   ├── ChatWindow.jsx # 聊天主窗口（消息列表 + 输入框）
-│   ├── MessageItem.jsx# 单条消息渲染组件
-│   └── Sidebar.jsx    # 侧边栏（历史会话管理）
-├── hooks/             # 自定义 Hooks
-│   └── useChat.jsx    # 聊天核心逻辑封装
-├── utils/             # 工具函数
-│   └── index.js       # ID 生成、本地存储封装
-├── App.jsx            # 应用入口与布局
-└── main.jsx           # React 挂载点
+├── components/          # UI 组件
+│   ├── ChatWindow/      # 聊天主窗口
+│   │   ├── index.jsx    # 组件逻辑
+│   │   └── index.css    # 组件样式
+│   ├── MessageItem/     # 单条消息渲染组件
+│   │   ├── index.jsx    # 组件逻辑
+│   │   └── index.css    # 组件样式
+│   └── Sidebar/         # 侧边栏
+│       ├── index.jsx    # 组件逻辑
+│       └── index.css    # 组件样式
+├── hooks/               # 自定义 Hooks
+│   └── useChat.jsx      # 聊天核心逻辑封装
+├── utils/               # 工具函数
+│   └── index.js         # ID 生成、本地存储封装
+├── App.jsx              # 应用入口与布局
+├── App.css              # 应用全局样式
+└── main.jsx             # React 挂载点
 ```
 
 ## 📝 开发规范
 
 - 使用 Functional Components 和 Hooks。
-- 样式主要使用 Inline Styles (CSS-in-JS) 以便于快速迭代和动态样式处理。
+- 组件采用目录结构管理（`index.jsx` + `index.css`），实现样式与逻辑分离。
 - 所有的 API 请求逻辑封装在 `useChat` hook 中。
 
 ## 📄 License
