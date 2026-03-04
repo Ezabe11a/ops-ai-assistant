@@ -1,0 +1,142 @@
+import { useState, useRef, useEffect } from 'react'
+import Sidebar from './components/Sidebar'
+import ChatWindow from './components/ChatWindow'
+import useChat from './hooks/useChat'
+import { genId, loadSessions, saveSessions } from './utils/index'
+
+/**
+ * 应用主入口组件
+ * 负责全局状态管理、布局组装和会话同步
+ */
+export default function App() {
+  // 初始化会话列表
+  const [sessions, setSessions] = useState(() => loadSessions())
+  // 初始化当前会话ID
+  const [currentId, setCurrentId] = useState(() => {
+    const s = loadSessions()
+    return s.length > 0 ? s[0].id : null
+  })
+  const [input, setInput] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const bottomRef = useRef(null)
+
+  const currentSession = sessions.find(s => s.id === currentId)
+
+  // 使用自定义 Hook 管理聊天逻辑
+  const { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback } =
+    useChat(currentSession?.messages || [])
+
+  // 监听 messages 变化，实时同步更新到 sessions 并持久化
+  useEffect(() => {
+    if (!currentId) return
+
+    // 使用 setTimeout 将状态更新放入下一个事件循环，避免渲染冲突
+    const timer = setTimeout(() => {
+      setSessions(prev => {
+        const updated = prev.map(s => {
+          if (s.id !== currentId) return s
+          // 使用第一条用户消息作为会话标题
+          const firstUser = messages.find(m => m.role === 'user')
+          const title = firstUser
+            ? firstUser.content.slice(0, 20) + (firstUser.content.length > 20 ? '...' : '')
+            : s.title
+          
+          return {
+            ...s,
+            messages,
+            title
+          }
+        })
+        saveSessions(updated)
+        return updated
+      })
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [messages, currentId])
+
+  // 收到新消息时自动滚动到底部
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // 新建会话
+  const handleNew = () => {
+    const newSession = { id: genId(), title: '新对话', messages: [] }
+    const updated = [newSession, ...sessions]
+    setSessions(updated)
+    saveSessions(updated)
+    setCurrentId(newSession.id)
+    setMessages([])
+  }
+
+  // 切换会话
+  const handleSelect = (id) => {
+    if (id === currentId) return
+    const session = sessions.find(s => s.id === id)
+    setCurrentId(id)
+    setMessages(session?.messages || [])
+  }
+
+  // 删除会话
+  const handleDelete = (id) => {
+    const updated = sessions.filter(s => s.id !== id)
+    setSessions(updated)
+    saveSessions(updated)
+    if (id === currentId) {
+      const next = updated[0]
+      setCurrentId(next?.id || null)
+      setMessages(next?.messages || [])
+    }
+  }
+
+  // 处理消息发送
+  const handleSend = () => {
+    if (!input.trim() || loading) return
+    // 如果当前没有选中会话，则自动新建
+    if (!currentId) {
+      handleNew()
+    }
+    sendMessage(input.trim())
+    setInput('')
+  }
+
+  // 处理键盘事件（回车发送，Shift+Enter 换行）
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'system-ui, sans-serif' }}>
+
+      {/* 左侧历史会话栏 */}
+      <Sidebar
+        sessions={sessions}
+        currentId={currentId}
+        onSelect={handleSelect}
+        onNew={handleNew}
+        onDelete={handleDelete}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      {/* 右侧聊天主窗口 */}
+      <ChatWindow
+        currentSession={currentSession}
+        messages={messages}
+        loading={loading}
+        refreshMessage={refreshMessage}
+        setFeedback={setFeedback}
+        input={input}
+        setInput={setInput}
+        handleSend={handleSend}
+        handleKeyDown={handleKeyDown}
+        stopGenerate={stopGenerate}
+        bottomRef={bottomRef}
+      />
+    </div>
+  )
+}
