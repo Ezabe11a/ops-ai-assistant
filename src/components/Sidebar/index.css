@@ -21,14 +21,16 @@
 }
 
 .sidebar-header {
-  padding: 16px;
+  padding: 8px;
   display: flex;
   align-items: center;
-  min-height: 60px;
+  min-height: auto;
 }
 
 .sidebar-header.open {
-  justify-content: space-between;
+  justify-content: stretch;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .sidebar-header.closed {
@@ -36,12 +38,16 @@
 }
 
 .sidebar-toggle-btn {
+  width: 100%;
   background: transparent;
   border: none;
+  margin-top: 8px;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  color: #666;
+  padding: 10px;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +101,7 @@
 }
 
 .new-chat-btn.closed:hover {
-  background: #e5e5e5;
+  background: #e6dfd8;
 }
 
 .history-list {
@@ -108,7 +114,7 @@
 }
 
 .history-list.open {
-  padding: 0 12px;
+  padding: 0 16px;
   align-items: stretch;
 }
 
@@ -145,7 +151,7 @@
 
 .session-item.open {
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 10px 16px;
   width: auto;
   height: auto;
 }
@@ -153,18 +159,30 @@
 .session-item.closed {
   justify-content: center;
   padding: 10px 0;
-  width: 40px;
+  width: 100%;
   height: 40px;
+  margin-bottom: 2px;
+  margin-top: 2px;
+  box-sizing: border-box;
 }
 
 .session-item-content {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 左侧图标固定不挤压，避免长标题时图标消失 */
+.session-item-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete-btn {

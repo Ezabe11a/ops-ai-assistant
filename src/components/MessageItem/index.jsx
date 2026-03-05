@@ -48,11 +48,13 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
 
         {/* 消息内容 */}
         <div className="message-body">
-          {/* 发送者名称 */}
+          {/* 发送者名称（在边框外） */}
           <div className={`sender-name ${isUser ? 'user' : 'assistant'}`}>
             {isUser ? '你' : 'AI 助手'}
           </div>
 
+          {/* 仅对正文区域加边框，不含头像和名字 */}
+          <div className={`message-content-box ${isUser ? 'user' : 'assistant'}`}>
           <div className={`message-text ${isUser ? 'user' : 'assistant'}`}>
             {isUser ? (message.content || '') : (
               <ReactMarkdown 
@@ -152,6 +154,7 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
               </ActionBtn>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

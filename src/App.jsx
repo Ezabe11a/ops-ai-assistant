@@ -5,6 +5,18 @@ import useChat from './hooks/useChat'
 import { genId, loadSessions, saveSessions } from './utils/index'
 import './App.css'
 
+/** 从首条用户消息中提取简要、完整的一小段作为会话标题（首句/首行，再按字数截断） */
+function summarizeForTitle(content, maxLen = 24) {
+  if (!content || typeof content !== 'string') return ''
+  const trimmed = content.trim()
+  if (!trimmed) return ''
+  // 优先取首句（按句号、问号、感叹号、换行截断）
+  const firstSentence = trimmed.split(/[。！？\n.!?]/)[0].trim() || trimmed
+  const segment = (firstSentence || trimmed).trim()
+  if (segment.length <= maxLen) return segment
+  return segment.slice(0, maxLen) + '…'
+}
+
 /**
  * 应用主入口组件
  * 负责全局状态管理、布局组装和会话同步
@@ -40,11 +52,8 @@ export default function App() {
       setSessions(prev => {
         const updated = prev.map(s => {
           if (s.id !== currentId) return s
-          // 使用第一条用户消息作为会话标题
           const firstUser = messages.find(m => m.role === 'user')
-          const title = firstUser
-            ? firstUser.content.slice(0, 20) + (firstUser.content.length > 20 ? '...' : '')
-            : s.title
+          const title = firstUser ? summarizeForTitle(firstUser.content) : s.title
           
           return {
             ...s,

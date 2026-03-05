@@ -1,7 +1,7 @@
 .message-item-container {
   display: flex;
   flex-direction: column;
-  margin: 24px 0;
+  margin: 20px 0;
   padding: 0 16px;
   max-width: 48rem;
   width: 100%;
@@ -57,6 +57,26 @@
   min-width: 0;
 }
 
+/* 仅对正文区域加边框，不含头像和发送者名称 */
+.message-content-box {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fafafa;
+  box-sizing: border-box;
+  margin-top: 6px;
+}
+
+.message-content-box.user {
+  border-color: #e0e0e0;
+  background: #f0f0f0;
+}
+
+.message-content-box.assistant {
+  border-color: #e8e8e8;
+  background: #fcfcfc;
+}
+
 .sender-name {
   font-size: 14px;
   font-weight: 600;
@@ -82,8 +102,8 @@
 }
 
 .message-text.user {
-  background: #f4f4f4;
-  padding: 12px 16px;
+  background: transparent;
+  padding: 0;
   white-space: pre-wrap;
 }
 

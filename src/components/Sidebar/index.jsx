@@ -55,7 +55,9 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
             {isOpen ? (
               <>
                 <span className="session-item-content">
-                  <MessageSquare size={14} />
+                  <span className="session-item-icon" aria-hidden>
+                    <MessageSquare size={14} />
+                  </span>
                   {s.title || '新对话'}
                 </span>
                 <button
