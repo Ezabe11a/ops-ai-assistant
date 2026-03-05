@@ -12,10 +12,25 @@ import './index.css'
  * 单条消息渲染组件
  * 支持 Markdown、HTML 渲染、代码高亮
  */
-export default function MessageItem({ message, index, loading, onRefresh, onFeedback }) {
+export default function MessageItem({ message, index, loading, onRefresh, onFeedback, onSubmitChoices }) {
   const isUser = message.role === 'user'
   const isLast = loading && message.content === ''
   const [copied, setCopied] = useState(false)
+  const choices = message.choices
+  const isSingle = choices?.type === 'single'
+  const isMultiple = choices?.type === 'multiple'
+  const [selectedValues, setSelectedValues] = useState([])
+
+  const toggleChoice = (value) => {
+    if (isSingle) setSelectedValues(selectedValues.includes(value) ? [] : [value])
+    else setSelectedValues(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value])
+  }
+
+  const handleSubmitChoices = () => {
+    if (!selectedValues.length || !onSubmitChoices) return
+    onSubmitChoices(index, selectedValues)
+    setSelectedValues([])
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content)
@@ -73,6 +88,41 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
             )}
             {!isUser && isLast && message.content && '▋'}
           </div>
+
+          {/* 单选/多选选项（AI 返回的 choices 时显示） */}
+          {!isUser && choices?.options?.length && !loading && (
+            <div className="message-choices">
+              <div className="message-choices-options">
+                {choices.options.map((opt) => (
+                  <label key={opt.value} className="message-choice-item">
+                    {isSingle ? (
+                      <input
+                        type="radio"
+                        name={`choice-${index}`}
+                        checked={selectedValues.includes(opt.value)}
+                        onChange={() => toggleChoice(opt.value)}
+                      />
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={selectedValues.includes(opt.value)}
+                        onChange={() => toggleChoice(opt.value)}
+                      />
+                    )}
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="message-choices-submit"
+                disabled={!selectedValues.length}
+                onClick={handleSubmitChoices}
+              >
+                提交
+              </button>
+            </div>
+          )}
 
           {/* 操作栏，只在assistant消息显示 */}
           {!isUser && message.content && (

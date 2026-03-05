@@ -93,6 +93,65 @@
   white-space: normal;
 }
 
+/* 单选/多选选项区域 */
+.message-choices {
+  margin-top: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+}
+
+.message-choices-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.message-choice-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  color: #2d2d2d;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  transition: background 0.15s;
+}
+
+.message-choice-item:hover {
+  background: #eef1f4;
+}
+
+.message-choice-item input[type="radio"],
+.message-choice-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #d95a3c;
+  cursor: pointer;
+}
+
+.message-choices-submit {
+  padding: 8px 20px;
+  font-size: 14px;
+  color: #fff;
+  background: #d95a3c;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.message-choices-submit:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.message-choices-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .action-buttons {
   display: flex;
   gap: 8px;

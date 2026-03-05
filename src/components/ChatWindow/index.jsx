@@ -21,7 +21,8 @@ export default function ChatWindow({
   messageListRef,
   onMessageListScroll,
   onCompositionStart,
-  onCompositionEnd
+  onCompositionEnd,
+  onSubmitChoices
 }) {
   return (
     <div className="chat-window-container">
@@ -52,6 +53,7 @@ export default function ChatWindow({
             loading={loading}
             onRefresh={refreshMessage}
             onFeedback={setFeedback}
+            onSubmitChoices={onSubmitChoices}
           />
         ))}
         {/* 自动滚动锚点 */}

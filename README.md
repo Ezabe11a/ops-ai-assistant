@@ -46,11 +46,20 @@ npm install
 
 ### 3. 配置环境变量
 
-在项目根目录创建 `.env` 文件，并添加以下配置（使用阿里云 DashScope API 或兼容 OpenAI 格式的 API）：
+在项目根目录创建 `.env` 文件，配置 **Qwen/通义（DashScope 兼容模式）** 接口：
 
 ```env
+# 必填：在阿里云百炼/Model Studio 获取 API Key
 VITE_QWEN_API_KEY=your_api_key_here
+
+# 可选：不填则默认使用国内 DashScope 兼容地址
+# 国内: https://dashscope.aliyuncs.com/compatible-mode/v1
+# 国际(新加坡): https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+# 美国(弗吉尼亚): https://dashscope-us.aliyuncs.com/compatible-mode/v1
 VITE_QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+
+# 可选：模型名称，默认 qwen-plus（可改为 qwen-turbo / qwen-max 等）
+VITE_QWEN_MODEL=qwen-plus
 ```
 
 ### 4. 启动开发服务器

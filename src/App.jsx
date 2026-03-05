@@ -28,7 +28,7 @@ export default function App() {
   const currentSession = sessions.find(s => s.id === currentId)
 
   // 使用自定义 Hook 管理聊天逻辑
-  const { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback } =
+  const { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback, submitChoices } =
     useChat(currentSession?.messages || [])
 
   // 监听 messages 变化，实时同步更新到 sessions 并持久化
@@ -175,6 +175,7 @@ export default function App() {
             justEndedCompositionRef.current = false
           }, 0)
         }}
+        onSubmitChoices={submitChoices}
       />
     </div>
   )

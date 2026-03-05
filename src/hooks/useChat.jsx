@@ -1,12 +1,42 @@
 import { useState, useRef } from 'react'
 
+/** Qwen/DashScope 兼容接口配置（阿里云百炼 / 通义） */
+const QWEN_API = {
+  baseUrl: import.meta.env.VITE_QWEN_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+  apiKey: import.meta.env.VITE_QWEN_API_KEY || '',
+  model: import.meta.env.VITE_QWEN_MODEL || 'qwen-plus'
+}
+
 /**
  * 聊天核心逻辑 Hook
- * 管理消息列表、API 请求状态、流式响应处理
- * 
+ * 管理消息列表、API 请求状态、流式响应处理；已适配 Qwen/DashScope 兼容接口
+ *
  * @param {Array} initialMessages 初始消息列表
- * @returns {Object} 包含消息列表、发送函数、停止生成、刷新消息等方法
+ * @returns {Object} 包含消息列表、发送函数、停止生成、刷新消息、提交选项等方法
  */
+
+/**
+ * 从消息 content 中解析 ```choices ... ``` 或 ```json ... ``` 块，提取并移除
+ * @returns {{ content: string, choices: { type: 'single'|'multiple', options: Array<{value:string, label:string}> } | null }}
+ */
+function parseChoicesFromContent(content) {
+  if (!content || typeof content !== 'string') return { content: content || '', choices: null }
+  const choicesBlock = /```(?:choices|json)\s*\n([\s\S]*?)```/.exec(content)
+  let raw = null
+  if (choicesBlock) raw = choicesBlock[1].trim()
+  if (!raw) return { content, choices: null }
+  try {
+    const data = JSON.parse(raw)
+    const choices = data.choices || (data.type && data.options ? data : null)
+    if (!choices || !Array.isArray(choices.options) || !['single', 'multiple'].includes(choices.type))
+      return { content, choices: null }
+    const cleaned = content.replace(choicesBlock[0], '').trim()
+    return { content: cleaned, choices }
+  } catch (_) {
+    return { content, choices: null }
+  }
+}
+
 export default function useChat(initialMessages = []) {
   const [messages, setMessages] = useState(initialMessages)
   const [loading, setLoading] = useState(false)
@@ -31,21 +61,28 @@ export default function useChat(initialMessages = []) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_QWEN_BASE_URL}/chat/completions`,
+        `${QWEN_API.baseUrl}/chat/completions`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_QWEN_API_KEY}`
+            'Authorization': `Bearer ${QWEN_API.apiKey}`
           },
           signal: abortRef.current.signal,
           body: JSON.stringify({
-            model: 'qwen-plus',
+            model: QWEN_API.model,
             messages: newMessages,
-            stream: true // 开启流式响应
+            stream: true,
+            stream_options: { include_usage: true }
           })
         }
       )
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}))
+        const msg = errBody.error?.message ?? errBody.message ?? errBody.msg ?? `请求失败 (${response.status})`
+        throw new Error(msg)
+      }
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
@@ -75,13 +112,23 @@ export default function useChat(initialMessages = []) {
           }
         }
       }
+      // 流式结束后解析 content 中的 choices 块并挂到消息上
+      setMessages(prev => {
+        const updated = [...prev]
+        const last = updated[updated.length - 1]
+        if (!last || last.role !== 'assistant') return updated
+        const { content: cleaned, choices } = parseChoicesFromContent(last.content)
+        updated[updated.length - 1] = { ...last, content: cleaned, ...(choices ? { choices } : {}) }
+        return updated
+      })
     } catch (err) {
       if (err.name !== 'AbortError') {
+        const errMsg = err.message && err.message !== 'Failed to fetch' ? err.message : '请求出错，请重试'
         setMessages(prev => {
           const updated = [...prev]
           updated[updated.length - 1] = {
             ...updated[updated.length - 1],
-            content: '请求出错，请重试'
+            content: errMsg
           }
           return updated
         })
@@ -89,6 +136,22 @@ export default function useChat(initialMessages = []) {
     } finally {
       setLoading(false)
     }
+  }
+
+  /**
+   * 提交用户对某条 assistant 消息中选项的选择，作为下一条用户消息发给 API
+   * @param {number} messageIndex 该条 assistant 消息在 messages 中的下标
+   * @param {string[]} selectedValues 选中的 option.value 列表（单选一个，多选多个）
+   */
+  const submitChoices = (messageIndex, selectedValues) => {
+    const msg = messages[messageIndex]
+    if (!msg?.choices?.options?.length || !selectedValues?.length) return
+    const labels = msg.choices.options
+      .filter(opt => selectedValues.includes(opt.value))
+      .map(opt => opt.label)
+    const content = `用户选择：${labels.join('、')}`
+    const context = messages.slice(0, messageIndex + 1)
+    sendMessage(content, context)
   }
 
   /**
@@ -120,21 +183,28 @@ export default function useChat(initialMessages = []) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_QWEN_BASE_URL}/chat/completions`,
+        `${QWEN_API.baseUrl}/chat/completions`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_QWEN_API_KEY}`
+            'Authorization': `Bearer ${QWEN_API.apiKey}`
           },
           signal: abortRef.current.signal,
           body: JSON.stringify({
-            model: 'qwen-plus',
+            model: QWEN_API.model,
             messages: context,
-            stream: true
+            stream: true,
+            stream_options: { include_usage: true }
           })
         }
       )
+
+      if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}))
+        const msg = errBody.error?.message ?? errBody.message ?? errBody.msg ?? `请求失败 (${response.status})`
+        throw new Error(msg)
+      }
 
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
@@ -162,11 +232,20 @@ export default function useChat(initialMessages = []) {
           }
         }
       }
+      setMessages(prev => {
+        const updated = [...prev]
+        const target = updated[index]
+        if (!target || target.role !== 'assistant') return updated
+        const { content: cleaned, choices } = parseChoicesFromContent(target.content)
+        updated[index] = { ...target, content: cleaned, ...(choices ? { choices } : {}) }
+        return updated
+      })
     } catch (err) {
       if (err.name !== 'AbortError') {
+        const errMsg = err.message && err.message !== 'Failed to fetch' ? err.message : '请求出错，请重试'
         setMessages(prev => {
           const updated = [...prev]
-          updated[index] = { ...updated[index], content: '请求出错，请重试' }
+          updated[index] = { ...updated[index], content: errMsg }
           return updated
         })
       }
@@ -186,5 +265,5 @@ export default function useChat(initialMessages = []) {
     })
   }
 
-  return { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback }
+  return { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback, submitChoices }
 }
