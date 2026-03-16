@@ -14,6 +14,10 @@ export default function ChatWindow({
   setFeedback,
   input,
   setInput,
+  attachments = [],
+  onAddAttachments,
+  onRemoveAttachment,
+  attachmentUploading = false,
   handleSend,
   handleKeyDown,
   stopGenerate,
@@ -79,19 +83,53 @@ export default function ChatWindow({
           />
           <div className="input-actions">
              <div className="input-tools">
-               <button className="attachment-btn">
+               <label className="attachment-btn" title="上传附件">
                  <Paperclip size={20} />
-               </button>
+                 <input
+                   type="file"
+                   multiple
+                   className="hidden-file-input"
+                   onChange={e => {
+                     if (!onAddAttachments) return
+                     onAddAttachments(e.target.files)
+                     e.target.value = ''
+                   }}
+                 />
+               </label>
              </div>
              <button
               onClick={loading ? stopGenerate : handleSend}
-              disabled={!input.trim() && !loading}
-              className={`send-btn ${(input.trim() || loading) ? 'active' : 'disabled'}`}
+              disabled={(!input.trim() && attachments.length === 0) || loading || attachmentUploading}
+              className={`send-btn ${((input.trim() || attachments.length > 0) && !loading && !attachmentUploading) ? 'active' : 'disabled'}`}
             >
               {loading ? <Square size={14} fill="currentColor" /> : <Send size={14} />}
-              {loading ? '停止' : '发送'}
+              {loading ? '停止' : (attachmentUploading ? '上传中' : '发送')}
             </button>
           </div>
+          {!!attachments.length && (
+            <div className="attachment-preview-list">
+              {attachments.map(file => (
+                <div className="attachment-chip" key={file.id}>
+                  <div className="attachment-info">
+                    {file.preview ? (
+                      <span className="attachment-thumb" style={{ backgroundImage: `url(${file.preview})` }} />
+                    ) : (
+                      <Paperclip size={14} />
+                    )}
+                    <span className="attachment-name" title={file.name}>{file.name}</span>
+                    <span className="attachment-size">{Math.max(1, Math.round(file.size / 1024))}KB</span>
+                  </div>
+                  <button
+                    className="attachment-remove"
+                    onClick={() => onRemoveAttachment?.(file.id)}
+                    aria-label="移除附件"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="disclaimer">
           AI 可能会犯错，请核对重要信息。

@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
 import rehypeRaw from 'rehype-raw'
 import {
-  User, Bot, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check
+  User, Bot, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check, Paperclip
 } from 'lucide-react'
 import './index.css'
 
@@ -37,6 +37,8 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const attachments = message.attachments || []
 
   return (
     <div className={`message-item-container ${isUser ? 'user' : 'assistant'}`}>
@@ -90,6 +92,21 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
             )}
             {!isUser && isLast && message.content && '▋'}
           </div>
+          {!!attachments.length && (
+            <div className="message-attachments">
+              {attachments.map(file => (
+                <div className="message-attachment" key={file.id || file.name}>
+                  {file.preview ? (
+                    <span className="message-attachment-thumb" style={{ backgroundImage: `url(${file.preview})` }} />
+                  ) : (
+                    <Paperclip size={14} />
+                  )}
+                  <span className="message-attachment-name" title={file.name}>{file.name}</span>
+                  <span className="message-attachment-size">{Math.max(1, Math.round((file.size || 0) / 1024))}KB</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* 单选/多选选项（AI 返回的 choices 时显示） */}
           {!isUser && choices?.options?.length && !loading && (

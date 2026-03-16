@@ -47,10 +47,10 @@ export default function useChat(initialMessages = []) {
    * @param {string} userInput 用户输入的内容
    * @param {Array} historyOverride (可选)覆盖当前历史记录，用于重试等场景
    */
-  const sendMessage = async (userInput, historyOverride) => {
+  const sendMessage = async (userInput, historyOverride, attachments = []) => {
     const base = historyOverride ?? messages
-    // 1. 添加用户消息到列表
-    const newMessages = [...base, { role: 'user', content: userInput }]
+    // 1. 添加用户消息到列表（带附件元信息）
+    const newMessages = [...base, { role: 'user', content: userInput, attachments }]
     setMessages(newMessages)
     setLoading(true)
     // 2. 预占位 assistant 消息
@@ -71,7 +71,14 @@ export default function useChat(initialMessages = []) {
           signal: abortRef.current.signal,
           body: JSON.stringify({
             model: QWEN_API.model,
-            messages: newMessages,
+            messages: newMessages.map(m => ({
+              ...m,
+              // 将附件信息附加到内容末尾传给模型，方便上下文理解
+              content: m.attachments?.length
+                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}${att.url ? `: ${att.url}` : ''} (${Math.max(1, Math.round(att.size / 1024))}KB)`).join('\n')}`
+                : m.content,
+              attachments: undefined
+            })),
             stream: true,
             stream_options: { include_usage: true }
           })
@@ -191,9 +198,15 @@ export default function useChat(initialMessages = []) {
             'Authorization': `Bearer ${QWEN_API.apiKey}`
           },
           signal: abortRef.current.signal,
-          body: JSON.stringify({
+            body: JSON.stringify({
             model: QWEN_API.model,
-            messages: context,
+            messages: context.map(m => ({
+              ...m,
+              content: m.attachments?.length
+                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}${att.url ? `: ${att.url}` : ''} (${Math.max(1, Math.round(att.size / 1024))}KB)`).join('\n')}`
+                : m.content,
+              attachments: undefined
+            })),
             stream: true,
             stream_options: { include_usage: true }
           })
