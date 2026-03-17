@@ -1,11 +1,11 @@
 /**
- * 上传文件到对象存储/后端，返回可公开访问的 URL
- * 依赖环境变量：
- * - VITE_UPLOAD_URL：上传接口地址（默认 /api/upload）
- * - 可选 VITE_UPLOAD_TOKEN：鉴权 token
+ * 上传文件到后端解析/存储接口
+ * 需要在 .env 配置 VITE_UPLOAD_URL（必填）、VITE_UPLOAD_TOKEN（可选）
+ * 返回 { url }
  */
 export async function uploadFile(file) {
-  const endpoint = import.meta.env.VITE_UPLOAD_URL || '/api/upload'
+  const endpoint = import.meta.env.VITE_UPLOAD_URL
+  if (!endpoint) throw new Error('未配置 VITE_UPLOAD_URL')
   const token = import.meta.env.VITE_UPLOAD_TOKEN
 
   const form = new FormData()
@@ -25,4 +25,9 @@ export async function uploadFile(file) {
   const data = await res.json()
   if (!data.url) throw new Error('上传返回缺少 url')
   return { url: data.url }
+}
+
+export function summarizeFailedAttachments(list = []) {
+  if (!list.length) return ''
+  return `以下附件上传失败：${list.map(i => i.name).join('、')}`
 }

@@ -73,9 +73,9 @@ export default function useChat(initialMessages = []) {
             model: QWEN_API.model,
             messages: newMessages.map(m => ({
               ...m,
-              // 将附件信息附加到内容末尾传给模型，方便上下文理解
+              // 将附件 URL 列表附加到内容末尾，方便大模型获取文件位置
               content: m.attachments?.length
-                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}${att.url ? `: ${att.url}` : ''} (${Math.max(1, Math.round(att.size / 1024))}KB)`).join('\n')}`
+                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
                 : m.content,
               attachments: undefined
             })),
@@ -203,7 +203,7 @@ export default function useChat(initialMessages = []) {
             messages: context.map(m => ({
               ...m,
               content: m.attachments?.length
-                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}${att.url ? `: ${att.url}` : ''} (${Math.max(1, Math.round(att.size / 1024))}KB)`).join('\n')}`
+                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
                 : m.content,
               attachments: undefined
             })),

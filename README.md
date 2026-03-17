@@ -17,6 +17,7 @@
   - 支持重新生成回答。
   - 支持点赞/点踩反馈。
   - 停止生成功能。
+  - 附件上传：前端选择文件 → 上传到你提供的后端 → 将返回的 URL 附在提问文本中，让模型读取/后端解析。
 
 ## 🛠️ 技术栈
 
@@ -60,6 +61,11 @@ VITE_QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 # 可选：模型名称，默认 qwen-plus（可改为 qwen-turbo / qwen-max 等）
 VITE_QWEN_MODEL=qwen-plus
+
+# （可选）附件上传/解析后端接口：前端只上传文件，不做解析
+# VITE_UPLOAD_URL=https://your-backend/upload
+# 可选鉴权 token
+# VITE_UPLOAD_TOKEN=your_token
 ```
 
 ### 4. 启动开发服务器
@@ -102,6 +108,35 @@ src/
 - 使用 Functional Components 和 Hooks。
 - 组件采用目录结构管理（`index.jsx` + `index.css`），实现样式与逻辑分离。
 - 所有的 API 请求逻辑封装在 `useChat` hook 中。
+
+## 📎 附件上传与后端解析规范
+
+前端不解析文件内容，只负责上传到后端并把后端返回的可访问 URL 附在问题末尾。未配置 `VITE_UPLOAD_URL` 时，选择附件会提示并阻止发送。
+
+**接口约定（自行实现）：**
+
+- `POST {VITE_UPLOAD_URL}`
+- `Content-Type: multipart/form-data`
+- 字段：`file`（单文件）
+- 返回 JSON：`{ "url": "https://your-domain/path/file.xxx" }`
+  - `url` 应为模型可访问的链接（公网或当前网络可达）
+- 鉴权：若需要，前端会带 `Authorization: Bearer <VITE_UPLOAD_TOKEN>`
+
+**前端行为：**
+
+- 上传失败会列出失败文件名；无文本且全部失败时不会发送空消息。
+- 发送给模型的用户内容末尾会附加：
+  ```
+  [附件]
+  - report.pdf: https://...
+  - log.txt: https://...
+  ```
+
+**后端建议：**
+
+- 校验文件类型/大小；必要时生成短效预签名 URL。
+- 若需要先行解析（提取文本、生成摘要），可在上传后返回解析后的可访问地址。
+- 确保开启 CORS 允许当前前端域名的 `POST`。
 
 ## 📄 License
 

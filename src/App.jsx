@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar/index.jsx'
 import ChatWindow from './components/ChatWindow/index.jsx'
 import useChat from './hooks/useChat'
 import { genId, loadSessions, saveSessions } from './utils/index'
+import { uploadFile, summarizeFailedAttachments } from './utils/upload'
 import './App.css'
 
 /** 从首条用户消息中提取简要、完整的一小段作为会话标题（首句/首行，再按字数截断） */
@@ -125,32 +126,43 @@ export default function App() {
       handleNew()
     }
     shouldAutoScrollRef.current = true
-    // 确保附件已有 URL（上传到对象存储）
-    setAttachmentUploading(true)
-    const finalized = await Promise.all(attachments.map(async att => {
-      if (att.url) return att
-      try {
-        const { uploadFile } = await import('./utils/upload')
-        const uploaded = await uploadFile(att.file)
-        return { ...att, url: uploaded.url }
-      } catch (e) {
-        return { ...att, error: e.message || '上传失败' }
+    // 需要后端接口上传附件，得到 URL
+    let uploadedAttachments = []
+    let failedAttachments = []
+    if (attachments.length) {
+      if (!import.meta.env.VITE_UPLOAD_URL) {
+        alert('请先在 .env 中配置 VITE_UPLOAD_URL，指向后端附件解析/上传接口')
+        return
       }
-    }))
-    setAttachmentUploading(false)
+      setAttachmentUploading(true)
+      const results = await Promise.all(attachments.map(async att => {
+        try {
+          const uploaded = await uploadFile(att.file)
+          return { ...att, url: uploaded.url }
+        } catch (e) {
+          return { ...att, error: e.message || '上传失败' }
+        }
+      }))
+      setAttachmentUploading(false)
+      uploadedAttachments = results.filter(r => r.url)
+      failedAttachments = results.filter(r => r.error)
+      setAttachments(uploadedAttachments)
+    }
 
-    const okAttachments = finalized.filter(a => a.url)
-    const failed = finalized.filter(a => a.error)
-    setAttachments(okAttachments)
+    const failNote = summarizeFailedAttachments(failedAttachments)
+    const userContent = [input.trim(), failNote].filter(Boolean).join('\n\n')
 
-    sendMessage(input.trim(), undefined, okAttachments)
+    // 若全失败且无文本，直接提示
+    if (!userContent && !uploadedAttachments.length) {
+      alert('附件全部上传失败或未填写问题，请重试')
+      return
+    }
+
+    sendMessage(userContent, undefined, uploadedAttachments)
     setInput('')
     // 清理附件预览 URL
     attachments.forEach(att => att.preview && URL.revokeObjectURL(att.preview))
     setAttachments([])
-    if (failed.length) {
-      alert(`部分附件上传失败：${failed.map(f => f.name).join('、')}`)
-    }
   }
 
   // 处理键盘事件（回车发送，Shift+Enter 换行）
