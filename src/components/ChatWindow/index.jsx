@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import MessageItem from '../MessageItem/index.jsx'
-import { Bot, Paperclip, Send, Square, Brain, ChevronDown } from 'lucide-react'
+import { Bot, Paperclip, Send, Square, Brain, ChevronDown, Terminal, ShieldAlert, Code2, Search } from 'lucide-react'
 import './index.css'
 
 /**
@@ -35,6 +35,13 @@ export default function ChatWindow({
   onDeepThinkingChange
 }) {
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false)
+
+  const quickActions = [
+    { icon: <Search size={14} />, label: '排查日志', text: '请帮我分析一下这条错误日志的原因：\n' },
+    { icon: <Terminal size={14} />, label: '生成脚本', text: '请帮我写一个 Shell 脚本来实现以下功能：\n' },
+    { icon: <ShieldAlert size={14} />, label: '安全审计', text: '请帮我检查一下这段配置是否存在安全隐患：\n' },
+    { icon: <Code2 size={14} />, label: 'K8s 配置', text: '请帮我编写一个 Kubernetes Deployment YAML，要求如下：\n' },
+  ]
 
   const models = [
     { id: 'qwen-max', name: 'Qwen Max (旗舰版)' },
@@ -85,6 +92,29 @@ export default function ChatWindow({
 
       {/* 底部输入区域 */}
       <div className="input-area-container">
+        {/* 运维快捷指令 */}
+        {messages.length === 0 && (
+          <div className="quick-actions-container">
+            {quickActions.map((action, idx) => (
+              <button
+                key={idx}
+                className="quick-action-card"
+                onClick={() => {
+                  setInput(action.text)
+                  // 自动聚焦到 textarea
+                  const textarea = document.querySelector('.chat-textarea')
+                  if (textarea) {
+                    textarea.focus()
+                    textarea.setSelectionRange(action.text.length, action.text.length)
+                  }
+                }}
+              >
+                <span className="quick-action-icon">{action.icon}</span>
+                <span className="quick-action-label">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="input-wrapper">
           <textarea
             value={input}

@@ -1,6 +1,19 @@
-# Ops AI Assistant (运维助手)
+# 🚀 Ops AI Assistant (运维助手)
+
+[![React](https://img.shields.io/badge/React-19.2-blue.svg?logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-7.3-646CFF.svg?logo=vite)](https://vitejs.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-4.1-FCC72C.svg?logo=vitest)](https://vitest.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 这是一个基于 React 构建的现代化 AI 聊天助手应用，专为运维场景设计。界面风格参考 Claude，简洁高效，支持 Markdown 渲染、代码高亮、流式响应以及会话历史管理。
+
+> [!TIP]
+> 运维助手的核心优势在于“技能增强”功能，可以通过简单的 Markdown 文件定义 AI 的专业能力。
+
+<!-- 屏幕截图占位符 -->
+<!-- <p align="center">
+  <img src="path/to/screenshot.png" alt="Ops AI Assistant Screenshot" width="800">
+</p> -->
 
 ## ✨ 功能特性
 
@@ -23,6 +36,7 @@
 ## 🛠️ 技术栈
 
 - **核心框架**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **测试框架**: [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)
 - **UI 图标**: [Lucide React](https://lucide.dev/)
 - **Markdown 渲染**: 
   - [react-markdown](https://github.com/remarkjs/react-markdown)
@@ -75,7 +89,17 @@ VITE_QWEN_MODEL=qwen-plus
 npm run dev
 ```
 
-### 5. 构建生产版本
+### 5. 运行测试
+
+```bash
+# 运行所有测试
+npm test
+
+# 运行测试并查看结果
+npm run test:run
+```
+
+### 6. 构建生产版本
 
 ```bash
 npm run build
@@ -87,18 +111,19 @@ npm run build
 src/
 ├── components/          # UI 组件
 │   ├── ChatWindow/      # 聊天主窗口
-│   │   ├── index.jsx    # 组件逻辑
-│   │   └── index.css    # 组件样式
+│   ├── Layout/          # 整体布局组件
 │   ├── MessageItem/     # 单条消息渲染组件
-│   │   ├── index.jsx    # 组件逻辑
-│   │   └── index.css    # 组件样式
-│   └── Sidebar/         # 侧边栏
-│       ├── index.jsx    # 组件逻辑
-│       └── index.css    # 组件样式
+│   ├── ReasoningProcess/# 推理过程显示组件
+│   ├── Sidebar/         # 侧边栏
+│   └── SkillManager/    # 技能管理器
 ├── hooks/               # 自定义 Hooks
 │   └── useChat.jsx      # 聊天核心逻辑封装
+├── test/                # 测试配置
+│   └── setup.js         # Vitest 配置
 ├── utils/               # 工具函数
-│   └── index.js         # ID 生成、本地存储封装
+│   ├── index.js         # ID 生成、本地存储封装
+│   ├── skills.js        # 技能管理逻辑
+│   └── upload.js        # 附件上传逻辑
 ├── App.jsx              # 应用入口与布局
 ├── App.css              # 应用全局样式
 └── main.jsx             # React 挂载点
@@ -109,6 +134,7 @@ src/
 - 使用 Functional Components 和 Hooks。
 - 组件采用目录结构管理（`index.jsx` + `index.css`），实现样式与逻辑分离。
 - 所有的 API 请求逻辑封装在 `useChat` hook 中。
+- 遵循单一职责原则，复杂的逻辑提取为单独的 Hook 或 Utility 函数。
 
 ## 📎 附件上传与后端解析规范
 
@@ -123,21 +149,13 @@ src/
   - `url` 应为模型可访问的链接（公网或当前网络可达）
 - 鉴权：若需要，前端会带 `Authorization: Bearer <VITE_UPLOAD_TOKEN>`
 
-**前端行为：**
+## 🤝 贡献指南
 
-- 上传失败会列出失败文件名；无文本且全部失败时不会发送空消息。
-- 发送给模型的用户内容末尾会附加：
-  ```
-  [附件]
-  - report.pdf: https://...
-  - log.txt: https://...
-  ```
-
-**后端建议：**
-
-- 校验文件类型/大小；必要时生成短效预签名 URL。
-- 若需要先行解析（提取文本、生成摘要），可在上传后返回解析后的可访问地址。
-- 确保开启 CORS 允许当前前端域名的 `POST`。
+1. Fork 本仓库。
+2. 创建新的功能分支 (`git checkout -b feature/AmazingFeature`)。
+3. 提交你的更改 (`git commit -m 'Add some AmazingFeature'`)。
+4. 推送到分支 (`git push origin feature/AmazingFeature`)。
+5. 开启一个 Pull Request。
 
 ## 📄 License
 

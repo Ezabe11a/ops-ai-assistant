@@ -46,16 +46,17 @@ export const parseSkillFile = (file) => {
 
 /**
  * 获取当前所有已启用的技能内容拼接后的字符串
+ * @param {string} defaultPrompt 可选的默认提示词内容
  * @returns {string}
  */
-export const getEnabledSkillsPrompt = () => {
+export const getEnabledSkillsPrompt = (defaultPrompt = '') => {
   const skills = loadSkills()
   const enabledContent = skills
     .filter(s => s.enabled)
     .map(s => `### Skill: ${s.name}\n${s.content}`)
     .join('\n\n')
   
-  if (!enabledContent) return ''
+  if (!enabledContent) return defaultPrompt
   
-  return `You have the following special skills/instructions enabled:\n\n${enabledContent}`
+  return `You have the following special skills/instructions enabled:\n\n${enabledContent}${defaultPrompt ? '\n\n' + defaultPrompt : ''}`
 }

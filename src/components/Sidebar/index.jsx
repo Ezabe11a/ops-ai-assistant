@@ -92,7 +92,7 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
         <div className="footer-avatar">
           AI
         </div>
-        {isOpen && 'qwen'}
+        {isOpen && '运维助手 (Ops)'}
       </div>
     </div>
   )
