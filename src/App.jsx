@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import Sidebar from './components/Sidebar/index.jsx'
 import ChatWindow from './components/ChatWindow/index.jsx'
+import Layout from './components/Layout/index.jsx'
+import SkillManager from './components/SkillManager/index.jsx'
 import useChat from './hooks/useChat'
 import { genId, loadSessions, saveSessions } from './utils/index'
 import { uploadFile, summarizeFailedAttachments } from './utils/upload'
@@ -34,6 +36,7 @@ export default function App() {
   const [attachments, setAttachments] = useState([])
   const [attachmentUploading, setAttachmentUploading] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSkillManagerOpen, setIsSkillManagerOpen] = useState(false)
   const bottomRef = useRef(null)
   const messageListRef = useRef(null)
   const shouldAutoScrollRef = useRef(true)
@@ -43,8 +46,20 @@ export default function App() {
   const currentSession = sessions.find(s => s.id === currentId)
 
   // 使用自定义 Hook 管理聊天逻辑
-  const { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback, submitChoices } =
-    useChat(currentSession?.messages || [])
+  const { 
+    messages, 
+    setMessages, 
+    loading, 
+    sendMessage, 
+    stopGenerate, 
+    refreshMessage, 
+    setFeedback, 
+    submitChoices,
+    model,
+    setModel,
+    isDeepThinking,
+    setIsDeepThinking
+  } = useChat(currentSession?.messages || [])
 
   // 监听 messages 变化，实时同步更新到 sessions 并持久化
   useEffect(() => {
@@ -165,6 +180,23 @@ export default function App() {
     setAttachments([])
   }
 
+  // 处理消息编辑
+  const handleEditMessage = (index) => {
+    if (loading) stopGenerate()
+    
+    const targetMsg = messages[index]
+    if (!targetMsg || targetMsg.role !== 'user') return
+
+    // 1. 将内容回填到输入框
+    setInput(targetMsg.content)
+    
+    // 2. 移除该消息及其后的所有消息
+    const newMessages = messages.slice(0, index)
+    setMessages(newMessages)
+    
+    // 3. 聚焦输入框（可选，通过 setInput 触发渲染后用户可直接操作）
+  }
+
   // 处理键盘事件（回车发送，Shift+Enter 换行）
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -185,65 +217,77 @@ export default function App() {
   }
 
   return (
-    <div className="app-container">
-      {/* 左侧历史会话栏 */}
-      <Sidebar
-        sessions={sessions}
-        currentId={currentId}
-        onSelect={handleSelect}
-        onNew={handleNew}
-        onDelete={handleDelete}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
+    <>
+      <Layout
+        sidebar={
+          <Sidebar
+            sessions={sessions}
+            currentId={currentId}
+            onSelect={handleSelect}
+            onNew={handleNew}
+            onDelete={handleDelete}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(!isSidebarOpen)}
+            onOpenSkills={() => setIsSkillManagerOpen(true)}
+          />
+        }
+      >
+        <ChatWindow
+          currentSession={currentSession}
+          messages={messages}
+          loading={loading}
+          refreshMessage={refreshMessage}
+          setFeedback={setFeedback}
+          input={input}
+          setInput={setInput}
+          attachments={attachments}
+          attachmentUploading={attachmentUploading}
+          onAddAttachments={(files) => {
+            const added = Array.from(files || []).map(file => ({
+              id: genId(),
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              file,
+              preview: file.type?.startsWith('image/') ? URL.createObjectURL(file) : null
+            }))
+            setAttachments(prev => [...prev, ...added])
+          }}
+          onRemoveAttachment={(id) => {
+            setAttachments(prev => {
+              const target = prev.find(a => a.id === id)
+              if (target?.preview) URL.revokeObjectURL(target.preview)
+              return prev.filter(a => a.id !== id)
+            })
+          }}
+          handleSend={handleSend}
+          handleKeyDown={handleKeyDown}
+          stopGenerate={stopGenerate}
+          bottomRef={bottomRef}
+          messageListRef={messageListRef}
+          onMessageListScroll={handleMessageListScroll}
+          onCompositionStart={() => {
+            isComposingRef.current = true
+          }}
+          onCompositionEnd={() => {
+            isComposingRef.current = false
+            justEndedCompositionRef.current = true
+            setTimeout(() => {
+              justEndedCompositionRef.current = false
+            }, 0)
+          }}
+          onSubmitChoices={submitChoices}
+          onEditMessage={handleEditMessage}
+          model={model}
+          onModelChange={setModel}
+          isDeepThinking={isDeepThinking}
+          onDeepThinkingChange={setIsDeepThinking}
+        />
+      </Layout>
 
-      {/* 右侧聊天主窗口 */}
-      <ChatWindow
-        currentSession={currentSession}
-        messages={messages}
-        loading={loading}
-        refreshMessage={refreshMessage}
-        setFeedback={setFeedback}
-        input={input}
-        setInput={setInput}
-        attachments={attachments}
-        attachmentUploading={attachmentUploading}
-        onAddAttachments={(files) => {
-          const added = Array.from(files || []).map(file => ({
-            id: genId(),
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            file,
-            preview: file.type?.startsWith('image/') ? URL.createObjectURL(file) : null
-          }))
-          setAttachments(prev => [...prev, ...added])
-        }}
-        onRemoveAttachment={(id) => {
-          setAttachments(prev => {
-            const target = prev.find(a => a.id === id)
-            if (target?.preview) URL.revokeObjectURL(target.preview)
-            return prev.filter(a => a.id !== id)
-          })
-        }}
-        handleSend={handleSend}
-        handleKeyDown={handleKeyDown}
-        stopGenerate={stopGenerate}
-        bottomRef={bottomRef}
-        messageListRef={messageListRef}
-        onMessageListScroll={handleMessageListScroll}
-        onCompositionStart={() => {
-          isComposingRef.current = true
-        }}
-        onCompositionEnd={() => {
-          isComposingRef.current = false
-          justEndedCompositionRef.current = true
-          setTimeout(() => {
-            justEndedCompositionRef.current = false
-          }, 0)
-        }}
-        onSubmitChoices={submitChoices}
-      />
-    </div>
+      {isSkillManagerOpen && (
+        <SkillManager onClose={() => setIsSkillManagerOpen(false)} />
+      )}
+    </>
   )
 }

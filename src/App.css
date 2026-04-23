@@ -1,5 +1,10 @@
-.app-container {
-  display: flex;
-  height: 100vh;
-  font-family: system-ui, sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
 }

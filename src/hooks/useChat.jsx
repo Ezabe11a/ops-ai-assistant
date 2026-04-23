@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { getEnabledSkillsPrompt } from '../utils/skills'
 
 /** Qwen/DashScope 兼容接口配置（阿里云百炼 / 通义） */
 const QWEN_API = {
@@ -32,7 +33,7 @@ function parseChoicesFromContent(content) {
       return { content, choices: null }
     const cleaned = content.replace(choicesBlock[0], '').trim()
     return { content: cleaned, choices }
-  } catch (_) {
+  } catch {
     return { content, choices: null }
   }
 }
@@ -40,6 +41,8 @@ function parseChoicesFromContent(content) {
 export default function useChat(initialMessages = []) {
   const [messages, setMessages] = useState(initialMessages)
   const [loading, setLoading] = useState(false)
+  const [model, setModel] = useState(QWEN_API.model)
+  const [isDeepThinking, setIsDeepThinking] = useState(false)
   const abortRef = useRef(null)
 
   /**
@@ -53,11 +56,27 @@ export default function useChat(initialMessages = []) {
     const newMessages = [...base, { role: 'user', content: userInput, attachments }]
     setMessages(newMessages)
     setLoading(true)
-    // 2. 预占位 assistant 消息
-    setMessages(prev => [...prev, { role: 'assistant', content: '', feedback: null }])
+    // 2. 预占位 assistant 消息，增加 reasoning 字段用于展示思考过程
+    setMessages(prev => [...prev, { role: 'assistant', content: '', reasoning: '', feedback: null }])
 
     // 初始化 AbortController 用于中断请求
     abortRef.current = new AbortController()
+
+    const systemPrompt = getEnabledSkillsPrompt()
+    const apiMessages = [
+      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+      ...newMessages.map(m => ({
+        ...m,
+        // 将附件 URL 列表附加到内容末尾，方便大模型获取文件位置
+        content: m.attachments?.length
+          ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
+          : m.content,
+        attachments: undefined,
+        reasoning: undefined,
+        feedback: undefined,
+        choices: undefined
+      }))
+    ]
 
     try {
       const response = await fetch(
@@ -70,15 +89,8 @@ export default function useChat(initialMessages = []) {
           },
           signal: abortRef.current.signal,
           body: JSON.stringify({
-            model: QWEN_API.model,
-            messages: newMessages.map(m => ({
-              ...m,
-              // 将附件 URL 列表附加到内容末尾，方便大模型获取文件位置
-              content: m.attachments?.length
-                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
-                : m.content,
-              attachments: undefined
-            })),
+            model: isDeepThinking ? 'deepseek-r1' : model, // 使用支持推理的 deepseek-r1 模型
+            messages: apiMessages,
             stream: true,
             stream_options: { include_usage: true }
           })
@@ -104,13 +116,19 @@ export default function useChat(initialMessages = []) {
           const data = line.slice(5).trim()
           if (data === '[DONE]') break
           try {
-            const delta = JSON.parse(data)?.choices?.[0]?.delta?.content || ''
-            // 实时更新最后一条消息内容
+            const choice = JSON.parse(data)?.choices?.[0]
+            const deltaContent = choice?.delta?.content || ''
+            // 兼容不同 API 的推理字段名 (reasoning_content 或 reasoning)
+            const deltaReasoning = choice?.delta?.reasoning_content || choice?.delta?.reasoning || ''
+            
+            // 实时更新最后一条消息内容，包含思考过程
             setMessages(prev => {
               const updated = [...prev]
+              const last = updated[updated.length - 1]
               updated[updated.length - 1] = {
-                ...updated[updated.length - 1],
-                content: updated[updated.length - 1].content + delta
+                ...last,
+                content: last.content + deltaContent,
+                reasoning: (last.reasoning || '') + deltaReasoning
               }
               return updated
             })
@@ -182,11 +200,26 @@ export default function useChat(initialMessages = []) {
     // 清空该条回答重新生成
     setMessages(prev => {
       const updated = [...prev]
-      updated[index] = { role: 'assistant', content: '', feedback: null }
+      updated[index] = { role: 'assistant', content: '', reasoning: '', feedback: null }
       return updated
     })
     setLoading(true)
     abortRef.current = new AbortController()
+
+    const systemPrompt = getEnabledSkillsPrompt()
+    const apiMessages = [
+      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+      ...context.map(m => ({
+        ...m,
+        content: m.attachments?.length
+          ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
+          : m.content,
+        attachments: undefined,
+        reasoning: undefined,
+        feedback: undefined,
+        choices: undefined
+      }))
+    ]
 
     try {
       const response = await fetch(
@@ -199,14 +232,8 @@ export default function useChat(initialMessages = []) {
           },
           signal: abortRef.current.signal,
             body: JSON.stringify({
-            model: QWEN_API.model,
-            messages: context.map(m => ({
-              ...m,
-              content: m.attachments?.length
-                ? `${m.content}\n\n[附件]\n${m.attachments.map(att => `- ${att.name}: ${att.url}`).join('\n')}`
-                : m.content,
-              attachments: undefined
-            })),
+            model: isDeepThinking ? 'deepseek-r1' : model,
+            messages: apiMessages,
             stream: true,
             stream_options: { include_usage: true }
           })
@@ -231,12 +258,17 @@ export default function useChat(initialMessages = []) {
           const data = line.slice(5).trim()
           if (data === '[DONE]') break
           try {
-            const delta = JSON.parse(data)?.choices?.[0]?.delta?.content || ''
+            const choice = JSON.parse(data)?.choices?.[0]
+            const deltaContent = choice?.delta?.content || ''
+            const deltaReasoning = choice?.delta?.reasoning_content || choice?.delta?.reasoning || ''
+            
             setMessages(prev => {
               const updated = [...prev]
+              const target = updated[index]
               updated[index] = {
-                ...updated[index],
-                content: updated[index].content + delta
+                ...target,
+                content: target.content + deltaContent,
+                reasoning: (target.reasoning || '') + deltaReasoning
               }
               return updated
             })
@@ -278,5 +310,18 @@ export default function useChat(initialMessages = []) {
     })
   }
 
-  return { messages, setMessages, loading, sendMessage, stopGenerate, refreshMessage, setFeedback, submitChoices }
+  return { 
+    messages, 
+    setMessages, 
+    loading, 
+    sendMessage, 
+    stopGenerate, 
+    refreshMessage, 
+    setFeedback, 
+    submitChoices,
+    model,
+    setModel,
+    isDeepThinking,
+    setIsDeepThinking
+  }
 }

@@ -1,0 +1,58 @@
+/* 思考过程区域样式 */
+.message-reasoning-container {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  border-left: 2px solid #e5e5e5;
+  padding-left: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.message-reasoning-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.message-reasoning-toggle:hover {
+  color: #555;
+}
+
+.message-reasoning-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reasoning-icon {
+  color: #888;
+}
+
+.reasoning-icon.anim-pulse {
+  animation: reasoning-pulse 1.5s infinite;
+}
+
+@keyframes reasoning-pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.message-reasoning-content {
+  padding: 4px 0 12px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-style: italic;
+}

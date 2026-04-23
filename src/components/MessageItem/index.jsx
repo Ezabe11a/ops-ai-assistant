@@ -3,8 +3,9 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
 import rehypeRaw from 'rehype-raw'
+import ReasoningProcess from '../ReasoningProcess/index.jsx'
 import {
-  User, Bot, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check, Paperclip
+  User, Bot, Copy, RotateCcw, ThumbsUp, ThumbsDown, Check, Paperclip, Pencil
 } from 'lucide-react'
 import './index.css'
 
@@ -12,13 +13,12 @@ import './index.css'
  * 单条消息渲染组件
  * 支持 Markdown、HTML 渲染、代码高亮
  */
-export default function MessageItem({ message, index, loading, onRefresh, onFeedback, onSubmitChoices }) {
+export default function MessageItem({ message, index, loading, onRefresh, onFeedback, onSubmitChoices, onEdit }) {
   const isUser = message.role === 'user'
   const isLast = loading && message.content === ''
   const [copied, setCopied] = useState(false)
-  const choices = message.choices
-  const isSingle = choices?.type === 'single'
-  const isMultiple = choices?.type === 'multiple'
+  const { choices } = message
+  const isSingle = !choices?.type || choices?.type === 'single'
   const [selectedValues, setSelectedValues] = useState([])
 
   const toggleChoice = (value) => {
@@ -55,8 +55,18 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
             {isUser ? '你' : 'AI 助手'}
           </div>
 
+          {/* 展示思考过程（在回答框外面） */}
+          {!isUser && (
+            <ReasoningProcess 
+              reasoning={message.reasoning} 
+              isLast={isLast} 
+              hasContent={!!message.content} 
+            />
+          )}
+
           {/* 仅对正文区域加边框，不含头像和名字 */}
           <div className={`message-content-box ${isUser ? 'user' : 'assistant'}`}>
+          
           <div className={`message-text ${isUser ? 'user' : 'assistant'}`}>
             {isUser ? (message.content || '') : (
               <ReactMarkdown 
@@ -143,34 +153,51 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
             </div>
           )}
 
-          {/* 操作栏，只在assistant消息显示 */}
-          {!isUser && message.content && (
-            <div className="action-buttons">
-              <ActionBtn onClick={handleCopy} title="复制">
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-                <span>{copied ? '已复制' : '复制'}</span>
+          {/* 操作栏 */}
+          <div className="action-buttons">
+            {/* User 消息的操作 */}
+            {isUser && !loading && (
+              <ActionBtn onClick={() => onEdit(index)} title="编辑并重试">
+                <Pencil size={14} />
+                <span>编辑</span>
               </ActionBtn>
-              <ActionBtn onClick={() => onRefresh(index)} title="重试">
-                <RotateCcw size={14} />
-                <span>重试</span>
-              </ActionBtn>
-              <div className="spacer" />
-              <ActionBtn
-                onClick={() => onFeedback(index, message.feedback === 'up' ? null : 'up')}
-                title="有帮助"
-                active={message.feedback === 'up'}
-              >
-                <ThumbsUp size={14} />
-              </ActionBtn>
-              <ActionBtn
-                onClick={() => onFeedback(index, message.feedback === 'down' ? null : 'down')}
-                title="无帮助"
-                active={message.feedback === 'down'}
-              >
-                <ThumbsDown size={14} />
-              </ActionBtn>
-            </div>
-          )}
+            )}
+
+            {/* Assistant 消息的操作 */}
+            {!isUser && !loading && (
+              <>
+                {message.content && (
+                  <ActionBtn onClick={handleCopy} title="复制">
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    <span>{copied ? '已复制' : '复制'}</span>
+                  </ActionBtn>
+                )}
+                <ActionBtn onClick={() => onRefresh(index)} title="重试">
+                  <RotateCcw size={14} />
+                  <span>重试</span>
+                </ActionBtn>
+                {message.content && (
+                  <>
+                    <div className="spacer" />
+                    <ActionBtn
+                      onClick={() => onFeedback(index, message.feedback === 'up' ? null : 'up')}
+                      title="有帮助"
+                      active={message.feedback === 'up'}
+                    >
+                      <ThumbsUp size={14} />
+                    </ActionBtn>
+                    <ActionBtn
+                      onClick={() => onFeedback(index, message.feedback === 'down' ? null : 'down')}
+                      title="无帮助"
+                      active={message.feedback === 'down'}
+                    >
+                      <ThumbsDown size={14} />
+                    </ActionBtn>
+                  </>
+                )}
+              </>
+            )}
+          </div>
           </div>
         </div>
       </div>

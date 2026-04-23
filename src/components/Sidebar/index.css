@@ -1,5 +1,5 @@
 .sidebar-container {
-  height: 100vh;
+  height: 100%;
   background: #f9f9fa;
   border-right: 1px solid #e5e5e5;
   display: flex;
@@ -206,6 +206,44 @@
 
 .delete-btn:hover {
   color: #ff4d4f;
+}
+
+.skills-section {
+  padding: 8px 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.skills-section.closed {
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.skills-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.skills-btn:hover {
+  background: #e5e5e5;
+}
+
+.skills-section.closed .skills-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
 }
 
 .sidebar-footer {

@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, Menu } from 'lucide-react'
+import { Plus, MessageSquare, Trash2, Menu, Cpu } from 'lucide-react'
 import './index.css'
 
 /**
@@ -11,8 +11,9 @@ import './index.css'
  * @param {Function} onDelete 删除会话回调
  * @param {boolean} isOpen 侧边栏是否展开
  * @param {Function} onClose 切换侧边栏状态回调
+ * @param {Function} onOpenSkills 打开技能管理回调
  */
-export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete, isOpen, onClose }) {
+export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete, isOpen, onClose, onOpenSkills }) {
   return (
     <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
       {/* 顶部折叠按钮 */}
@@ -72,6 +73,18 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
             )}
           </div>
         ))}
+      </div>
+
+      {/* 技能管理按钮 */}
+      <div className={`skills-section ${isOpen ? 'open' : 'closed'}`}>
+        <button 
+          className="skills-btn" 
+          onClick={onOpenSkills}
+          title="技能管理"
+        >
+          <Cpu size={isOpen ? 16 : 20} />
+          {isOpen && <span>技能管理 (Skills)</span>}
+        </button>
       </div>
 
       {/* 底部用户信息 */}

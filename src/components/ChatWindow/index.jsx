@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import MessageItem from '../MessageItem/index.jsx'
-import { Bot, Paperclip, Send, Square } from 'lucide-react'
+import { Bot, Paperclip, Send, Square, Brain, ChevronDown } from 'lucide-react'
 import './index.css'
 
 /**
@@ -26,13 +27,30 @@ export default function ChatWindow({
   onMessageListScroll,
   onCompositionStart,
   onCompositionEnd,
-  onSubmitChoices
+  onSubmitChoices,
+  onEditMessage,
+  model,
+  onModelChange,
+  isDeepThinking,
+  onDeepThinkingChange
 }) {
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false)
+
+  const models = [
+    { id: 'qwen-max', name: 'Qwen Max (旗舰版)' },
+    { id: 'qwen-plus', name: 'Qwen Plus (标准版)' },
+    { id: 'deepseek-v3', name: 'DeepSeek V3' }
+  ]
+
+  const currentModelName = models.find(m => m.id === model)?.name || model
+
   return (
     <div className="chat-window-container">
       {/* 顶部标题栏 */}
       <div className="chat-header">
-        {currentSession?.title || '新对话'}
+        <div className="chat-header-left">
+          {currentSession?.title || '新对话'}
+        </div>
       </div>
 
       {/* 消息列表区域 */}
@@ -58,6 +76,7 @@ export default function ChatWindow({
             onRefresh={refreshMessage}
             onFeedback={setFeedback}
             onSubmitChoices={onSubmitChoices}
+            onEdit={onEditMessage}
           />
         ))}
         {/* 自动滚动锚点 */}
@@ -96,11 +115,46 @@ export default function ChatWindow({
                    }}
                  />
                </label>
+
+               <div className="model-selector">
+                 <button 
+                   className={`model-selector-btn ${isModelMenuOpen ? 'active' : ''}`}
+                   onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                 >
+                   <span>{currentModelName}</span>
+                   <ChevronDown size={14} />
+                 </button>
+                 {isModelMenuOpen && (
+                   <div className="model-dropdown">
+                     {models.map(m => (
+                       <div 
+                         key={m.id} 
+                         className={`model-option ${model === m.id ? 'selected' : ''}`}
+                         onClick={() => {
+                           onModelChange(m.id)
+                           setIsModelMenuOpen(false)
+                         }}
+                       >
+                         {m.name}
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
+
+               <button 
+                 className={`deep-thinking-btn ${isDeepThinking ? 'active' : ''}`}
+                 onClick={() => onDeepThinkingChange(!isDeepThinking)}
+                 title="深度思考"
+               >
+                 <Brain size={18} />
+                 <span>深度思考</span>
+               </button>
              </div>
              <button
               onClick={loading ? stopGenerate : handleSend}
-              disabled={(!input.trim() && attachments.length === 0) || loading || attachmentUploading}
-              className={`send-btn ${((input.trim() || attachments.length > 0) && !loading && !attachmentUploading) ? 'active' : 'disabled'}`}
+              disabled={(!loading && !input.trim() && attachments.length === 0) || attachmentUploading}
+              className={`send-btn ${(loading || (input.trim() || attachments.length > 0) && !attachmentUploading) ? 'active' : 'disabled'}`}
             >
               {loading ? <Square size={14} fill="currentColor" /> : <Send size={14} />}
               {loading ? '停止' : (attachmentUploading ? '上传中' : '发送')}

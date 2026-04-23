@@ -15,7 +15,84 @@
   color: #666;
   background: white;
   display: flex;
+  align-items: center;
   justify-content: center;
+}
+
+.chat-header-left {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.attachment-btn, .model-selector-btn, .deep-thinking-btn {
+  height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #666;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.attachment-btn:hover, .model-selector-btn:hover, .deep-thinking-btn:hover, .model-selector-btn.active {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.model-selector-btn, .deep-thinking-btn {
+  gap: 6px;
+}
+
+.model-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 180px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+  padding: 6px;
+  z-index: 100;
+}
+
+.model-option {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.model-option:hover {
+  background: #f5f5f5;
+}
+
+.model-option.selected {
+  background: #f0f7ff;
+  color: #007aff;
+  font-weight: 500;
+}
+
+
+
+.deep-thinking-btn.active {
+  background: #f0f7ff;
+  color: #007aff;
 }
 
 .message-list {
@@ -102,23 +179,12 @@
 .input-tools {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .attachment-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  color: #666;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 6px;
   position: relative;
-}
-
-.attachment-btn:hover {
-  background: #e8e8e8;
 }
 
 .hidden-file-input {
@@ -144,6 +210,18 @@
   background: #da7756;
   color: white;
   cursor: pointer;
+}
+
+.send-btn.active:hover {
+  background: #c06548;
+}
+
+.send-btn.active:has(.lucide-square) {
+  background: #ff4d4f;
+}
+
+.send-btn.active:has(.lucide-square):hover {
+  background: #ff7875;
 }
 
 .send-btn.disabled {
