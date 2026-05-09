@@ -88,9 +88,11 @@ export default function SkillManager({ onClose }) {
                     {skill.enabled ? <CheckCircle size={18} className="status-icon" /> : <Circle size={18} className="status-icon" />}
                     <span className="skill-name">{skill.name}</span>
                   </div>
-                  <button className="delete-skill-btn" onClick={() => deleteSkill(skill.id)}>
-                    <Trash2 size={16} />
-                  </button>
+                  {!skill.isBuiltIn && (
+                    <button className="delete-skill-btn" onClick={() => deleteSkill(skill.id)}>
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))
             )}

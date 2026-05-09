@@ -1,10 +1,110 @@
+:root {
+  --bg-main: #ffffff;
+  --bg-sidebar: #f7f7f7;
+  --bg-sidebar-hover: #e8e8e8;
+  --bg-sidebar-active: #e8e8e8;
+  --bg-chat: #ffffff;
+  --bg-input: #f4f4f4;
+  --bg-message-user: #f4f4f4;
+  --bg-message-assistant: transparent;
+  --bg-reasoning: #fafafa;
+  --bg-button: #f4f4f4;
+  --bg-button-hover: #e0e0e0;
+  --bg-modal: #ffffff;
+  --bg-modal-overlay: rgba(0, 0, 0, 0.4);
+
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --text-inverse: #ffffff;
+
+  --border-color: #e5e5e5;
+  --border-light: #f0f0f0;
+  --border-focus: #d1d1d1;
+
+  --color-primary: #da7756;
+  --color-primary-hover: #c06548;
+  --color-primary-light: #fff9f7;
+  
+  --color-blue: #007aff;
+  --color-blue-light: #f0f7ff;
+  
+  --color-danger: #ff4d4f;
+  --color-danger-hover: #ff7875;
+}
+
+[data-theme='dark'] {
+  --bg-main: #1e1e1e;
+  --bg-sidebar: #252526;
+  --bg-sidebar-hover: #2d2d2d;
+  --bg-sidebar-active: #333333;
+  --bg-chat: #1e1e1e;
+  --bg-input: #2d2d2d;
+  --bg-message-user: #2d2d2d;
+  --bg-message-assistant: transparent;
+  --bg-reasoning: #252526;
+  --bg-button: #333333;
+  --bg-button-hover: #444444;
+  --bg-modal: #252526;
+  --bg-modal-overlay: rgba(0, 0, 0, 0.6);
+
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+  --text-inverse: #ffffff;
+
+  --border-color: #333333;
+  --border-light: #2d2d2d;
+  --border-focus: #555555;
+
+  --color-primary: #da7756;
+  --color-primary-hover: #e07055;
+  --color-primary-light: #3a2a26;
+  
+  --color-blue: #3b82f6;
+  --color-blue-light: #1e293b;
+  
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
 }
 
 #root {
   height: 100%;
+}
+
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-focus);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: var(--border-focus);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }

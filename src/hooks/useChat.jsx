@@ -45,8 +45,7 @@ export default function useChat(initialMessages = []) {
   const [isDeepThinking, setIsDeepThinking] = useState(false)
   const abortRef = useRef(null)
 
-  const defaultOpsPrompt = `你是一个专业的 IT 运维专家助手。你的目标是帮助用户解决服务器管理、自动化脚本编写、故障排查、云原生架构（K8s, Docker）、CI/CD 流水线以及网络安全等方面的问题。
-优先提供可执行的命令，并解释关键参数的含义。在给出具有破坏性的命令前发出明确的安全警告。回答风格简洁、专业。`
+
 
   /**
    * 发送消息
@@ -65,7 +64,7 @@ export default function useChat(initialMessages = []) {
     // 初始化 AbortController 用于中断请求
     abortRef.current = new AbortController()
 
-    const systemPrompt = getEnabledSkillsPrompt(defaultOpsPrompt)
+    const systemPrompt = getEnabledSkillsPrompt()
     const apiMessages = [
       ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
       ...newMessages.map(m => ({
@@ -191,6 +190,54 @@ export default function useChat(initialMessages = []) {
   }
 
   /**
+   * 提示词优化 (单次无上下文调用)
+   * @param {string} userInput 原始用户输入
+   * @returns {Promise<string>} 优化后的提示词
+   */
+  const optimizePrompt = async (userInput) => {
+    try {
+      const response = await fetch(
+        `${QWEN_API.baseUrl}/chat/completions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${QWEN_API.apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'qwen-plus', // 优化提示词不需要深度思考，用基础模型即可
+            messages: [
+              { 
+                role: 'system', 
+                content: `你是一个专业的 Prompt 工程师。你的唯一任务是优化用户提供的指令，使其更加结构化、清晰，并包含必要的上下文。
+规则：
+1. 必须直接输出优化后的指令本身，不需要任何开场白（如"好的"、"优化后的提示词如下"）。
+2. 不要对用户的原始指令进行回答或解答。
+3. 不要使用任何多余的 Markdown 标记包装整体文本（如 \`\`\` 等）。` 
+              },
+              { role: 'user', content: `请将以下指令优化为更专业的提示词：\n\n${userInput}` }
+            ],
+            stream: false
+          })
+        }
+      )
+
+      if (!response.ok) throw new Error('优化请求失败')
+      
+      const data = await response.json()
+      let optimizedContent = data?.choices?.[0]?.message?.content
+      if (!optimizedContent) throw new Error('未返回内容')
+      
+      // 去除可能出现的外层代码块包装
+      optimizedContent = optimizedContent.trim().replace(/^```(markdown)?\n([\s\S]*)\n```$/, '$2').trim()
+      return optimizedContent
+    } catch (err) {
+      console.error('优化提示词失败:', err)
+      throw err
+    }
+  }
+
+  /**
    * 刷新（重新生成）某条 assistant 回答
    * @param {number} index 消息索引
    */
@@ -209,7 +256,7 @@ export default function useChat(initialMessages = []) {
     setLoading(true)
     abortRef.current = new AbortController()
 
-    const systemPrompt = getEnabledSkillsPrompt(defaultOpsPrompt)
+    const systemPrompt = getEnabledSkillsPrompt()
     const apiMessages = [
       ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
       ...context.map(m => ({
@@ -313,18 +360,19 @@ export default function useChat(initialMessages = []) {
     })
   }
 
-  return { 
-    messages, 
-    setMessages, 
-    loading, 
-    sendMessage, 
-    stopGenerate, 
-    refreshMessage, 
-    setFeedback, 
+  return {
+    messages,
+    setMessages,
+    loading,
+    sendMessage,
+    stopGenerate,
+    refreshMessage,
+    setFeedback,
     submitChoices,
     model,
     setModel,
     isDeepThinking,
-    setIsDeepThinking
+    setIsDeepThinking,
+    optimizePrompt
   }
 }

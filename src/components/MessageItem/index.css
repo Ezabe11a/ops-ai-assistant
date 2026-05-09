@@ -35,7 +35,7 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  color: white;
+  color: var(--text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,11 +44,11 @@
 }
 
 .avatar.user {
-  background: #da7756;
+  background: var(--color-primary);
 }
 
 .avatar.assistant {
-  background: #d95a3c;
+  background: var(--color-primary);
 }
 
 .message-body {
@@ -59,28 +59,29 @@
 
 /* 仅对正文区域加边框，不含头像和发送者名称 */
 .message-content-box {
-  border: 1px solid #e5e5e5;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 14px 16px;
-  background: #fafafa;
+  background: var(--bg-message-assistant);
   box-sizing: border-box;
   margin-top: 6px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .message-content-box.user {
-  border-color: #e0e0e0;
-  background: #f0f0f0;
+  border-color: var(--border-color);
+  background: var(--bg-message-user);
 }
 
 .message-content-box.assistant {
-  border-color: #e8e8e8;
-  background: #fcfcfc;
+  border-color: var(--border-light);
+  background: var(--bg-message-assistant);
 }
 
 .sender-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 6px;
 }
 
@@ -93,7 +94,7 @@
 }
 
 .message-text {
-  color: #2d2d2d;
+  color: var(--text-primary);
   border-radius: 8px;
   line-height: 1.7;
   word-break: break-word;
@@ -117,7 +118,7 @@
 .message-choices {
   margin-top: 12px;
   padding: 12px 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
 }
 
 .message-choices-options {
@@ -133,30 +134,30 @@
   gap: 10px;
   cursor: pointer;
   font-size: 15px;
-  color: #2d2d2d;
+  color: var(--text-primary);
   padding: 8px 12px;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: var(--bg-sidebar);
   transition: background 0.15s;
 }
 
 .message-choice-item:hover {
-  background: #eef1f4;
+  background: var(--bg-sidebar-hover);
 }
 
 .message-choice-item input[type="radio"],
 .message-choice-item input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #d95a3c;
+  accent-color: var(--color-primary);
   cursor: pointer;
 }
 
 .message-choices-submit {
   padding: 8px 20px;
   font-size: 14px;
-  color: #fff;
-  background: #d95a3c;
+  color: var(--text-inverse);
+  background: var(--color-primary);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -186,7 +187,7 @@
   cursor: pointer;
   padding: 4px 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -194,7 +195,7 @@
 }
 
 .action-btn:hover {
-  background: #f0f0f0;
+  background: var(--bg-button-hover);
 }
 
 .action-btn.active {
@@ -223,11 +224,11 @@
   gap: 6px;
   padding: 6px 8px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--bg-main);
   border: 1px solid #e6e6e6;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   font-size: 13px;
-  color: #444;
+  color: var(--text-primary);
 }
 
 .message-attachment-thumb {
@@ -236,7 +237,7 @@
   border-radius: 6px;
   background-size: cover;
   background-position: center;
-  border: 1px solid #eee;
+  border: 1px solid var(--border-color);
 }
 
 .message-attachment-name {
@@ -247,7 +248,7 @@
 }
 
 .message-attachment-size {
-  color: #999;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
@@ -255,39 +256,44 @@
 .markdown-table {
   border-collapse: collapse;
   width: 100%;
-  margin: 16px 0;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.markdown-th, .markdown-td {
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  text-align: left;
 }
 
 .markdown-th {
-  border: 1px solid #ddd;
-  padding: 8px;
-  background: #f9f9f9;
+  background: var(--bg-sidebar);
   font-weight: 600;
 }
 
-.markdown-td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
 .code-block-wrapper {
-  background: #f6f8fa;
-  border-radius: 6px;
-  padding: 16px;
-  margin: 16px 0;
-  overflow-x: auto;
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .code-block {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  font-size: 14px;
+  display: block;
+  padding: 16px;
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  overflow-x: auto;
 }
 
 .inline-code {
-  background: #f4f4f4;
-  padding: 2px 6px;
+  background: var(--bg-sidebar);
+  color: var(--color-primary);
+  padding: 2px 5px;
   border-radius: 4px;
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  font-size: 14px;
-  color: #eb5757;
+  font-size: 0.9em;
+  font-family: inherit;
 }

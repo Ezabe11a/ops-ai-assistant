@@ -2,9 +2,9 @@
 .message-reasoning-container {
   margin-top: 4px;
   margin-bottom: 8px;
-  border-left: 2px solid #e5e5e5;
+  border-left: 2px solid var(--border-color);
   padding-left: 12px;
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--bg-reasoning);
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
@@ -19,13 +19,13 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #888;
+  color: var(--text-tertiary);
   font-size: 13px;
   transition: color 0.2s;
 }
 
 .message-reasoning-toggle:hover {
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .message-reasoning-label {
@@ -35,7 +35,7 @@
 }
 
 .reasoning-icon {
-  color: #888;
+  color: var(--text-secondary);
 }
 
 .reasoning-icon.anim-pulse {
@@ -51,7 +51,7 @@
 .message-reasoning-content {
   padding: 4px 0 12px 0;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.6;
   white-space: pre-wrap;
   font-style: italic;

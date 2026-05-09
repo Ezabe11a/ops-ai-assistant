@@ -3,7 +3,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background-color: #fff;
+  background-color: var(--text-inverse);
 }
 
 .app-sidebar-wrapper {

@@ -58,8 +58,20 @@ export default function App() {
     model,
     setModel,
     isDeepThinking,
-    setIsDeepThinking
+    setIsDeepThinking,
+    optimizePrompt
   } = useChat(currentSession?.messages || [])
+
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('ops-ai-theme')
+    if (saved) return saved
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('ops-ai-theme', theme)
+  }, [theme])
 
   // 监听 messages 变化，实时同步更新到 sessions 并持久化
   useEffect(() => {
@@ -229,6 +241,8 @@ export default function App() {
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(!isSidebarOpen)}
             onOpenSkills={() => setIsSkillManagerOpen(true)}
+            theme={theme}
+            onToggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
           />
         }
       >
@@ -282,6 +296,7 @@ export default function App() {
           onModelChange={setModel}
           isDeepThinking={isDeepThinking}
           onDeepThinkingChange={setIsDeepThinking}
+          optimizePrompt={optimizePrompt}
         />
       </Layout>
 

@@ -17,21 +17,21 @@
 
 ## ✨ 功能特性
 
+- **专属运维场景**：内置专业的运维专家 Prompt，针对服务器管理、K8s、Docker、脚本编写、网络安全等场景进行调优。空状态提供快速操作卡片（如日志分析、安全审计等）。
+- **深度思考模式 (DeepSeek-R1)**：支持一键开启深度思考模型，展示 AI 解决问题的完整逻辑推理过程（Reasoning Process），并在界面外置显示。
+- **多模型无缝切换**：支持在通用模型（如 Qwen）和深度思考模型（如 DeepSeek-R1）之间快速切换，满足不同复杂度任务的需求。
+- **动态技能管理 (Skills)**：通过上传 `.txt` 或 `.md` 文件定义 AI 的专属“技能”，启用后自动注入 System Prompt，灵活扩展 AI 在特定领域的专业能力。
 - **多会话管理**：支持创建新对话、保存历史记录、删除对话。
+- **灵活的交互与重试**：
+  - 支持随时停止正在生成的回答。
+  - 支持重新编辑历史提问并重新发送。
+  - 支持重新生成 AI 的回答。
 - **流式响应**：基于 Server-Sent Events (SSE) 实现打字机效果的实时回复。
-- **Markdown 支持**：完美支持 GFM (GitHub Flavored Markdown)，包括表格、代码块、列表等。
-- **HTML 渲染**：支持 `<br>` 等基础 HTML 标签的渲染。
+- **Markdown 与代码高亮**：完美支持 GFM，包含表格、代码块及一键复制，适合查看各种配置和脚本。
 - **现代化 UI**：
-  - 响应式侧边栏（支持展开/收起，收起模式下显示图标）。
   - 扁平化设计，使用 Lucide React 图标库。
-  - 自动跟随滚动的聊天窗口。
-- **交互优化**：
-  - 支持消息复制。
-  - 支持重新生成回答。
-  - 支持点赞/点踩反馈。
-  - 停止生成功能。
-  - 附件上传：前端选择文件 → 上传到你提供的后端 → 将返回的 URL 附在提问文本中，让模型读取/后端解析。
-- **技能增强 (Skills)**：支持上传 `.txt` 或 `.md` 文件作为 AI 的“技能”指令。启用的技能将自动作为 System Prompt 注入对话，实现个性化角色定制或特定任务增强。
+  - 响应式侧边栏。
+  - 输入框自动拉伸及附件上传支持。
 
 ## 🛠️ 技术栈
 
@@ -62,24 +62,17 @@ npm install
 
 ### 3. 配置环境变量
 
-在项目根目录创建 `.env` 文件，配置 **Qwen/通义（DashScope 兼容模式）** 接口：
+在项目根目录创建 `.env` 文件，配置接口相关的 Key：
 
 ```env
 # 必填：在阿里云百炼/Model Studio 获取 API Key
 VITE_QWEN_API_KEY=your_api_key_here
 
 # 可选：不填则默认使用国内 DashScope 兼容地址
-# 国内: https://dashscope.aliyuncs.com/compatible-mode/v1
-# 国际(新加坡): https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-# 美国(弗吉尼亚): https://dashscope-us.aliyuncs.com/compatible-mode/v1
 VITE_QWEN_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
-# 可选：模型名称，默认 qwen-plus（可改为 qwen-turbo / qwen-max 等）
-VITE_QWEN_MODEL=qwen-plus
-
-# （可选）附件上传/解析后端接口：前端只上传文件，不做解析
+# （可选）附件上传/解析后端接口
 # VITE_UPLOAD_URL=https://your-backend/upload
-# 可选鉴权 token
 # VITE_UPLOAD_TOKEN=your_token
 ```
 

@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import MessageItem from '../MessageItem/index.jsx'
-import { Bot, Paperclip, Send, Square, Brain, ChevronDown, Terminal, ShieldAlert, Code2, Search } from 'lucide-react'
+import { Bot, Paperclip, Send, Square, Brain, ChevronDown, Terminal, ShieldAlert, Code2, Search, Sparkles } from 'lucide-react'
 import './index.css'
 
 /**
  * 聊天主窗口组件
- * 包含顶部标题栏、消息列表区域和底部输入区域
  */
 export default function ChatWindow({
   currentSession,
@@ -15,10 +14,10 @@ export default function ChatWindow({
   setFeedback,
   input,
   setInput,
-  attachments = [],
+  attachments,
+  attachmentUploading,
   onAddAttachments,
   onRemoveAttachment,
-  attachmentUploading = false,
   handleSend,
   handleKeyDown,
   stopGenerate,
@@ -32,9 +31,21 @@ export default function ChatWindow({
   model,
   onModelChange,
   isDeepThinking,
-  onDeepThinkingChange
+  onDeepThinkingChange,
+  optimizePrompt
 }) {
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false)
+  const [isOptimizing, setIsOptimizing] = useState(false)
+  const textareaRef = useRef(null)
+
+  // 监听输入内容变化，自动调整高度
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'
+    }
+  }, [input])
 
   const quickActions = [
     { icon: <Search size={14} />, label: '排查日志', text: '请帮我分析一下这条错误日志的原因：\n' },
@@ -50,6 +61,19 @@ export default function ChatWindow({
   ]
 
   const currentModelName = models.find(m => m.id === model)?.name || model
+
+  const handleOptimizePrompt = async () => {
+    if (!input.trim() || isOptimizing) return
+    setIsOptimizing(true)
+    try {
+      const optimized = await optimizePrompt(input)
+      setInput(optimized)
+    } catch (err) {
+      alert(err.message || '优化提示词失败')
+    } finally {
+      setIsOptimizing(false)
+    }
+  }
 
   return (
     <div className="chat-window-container">
@@ -117,6 +141,7 @@ export default function ChatWindow({
         )}
         <div className="input-wrapper">
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -125,10 +150,6 @@ export default function ChatWindow({
             placeholder="输入消息..."
             rows={1}
             className="chat-textarea"
-            onInput={e => {
-              e.target.style.height = 'auto'
-              e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px'
-            }}
           />
           <div className="input-actions">
              <div className="input-tools">
@@ -181,14 +202,36 @@ export default function ChatWindow({
                  <span>深度思考</span>
                </button>
              </div>
-             <button
-              onClick={loading ? stopGenerate : handleSend}
-              disabled={(!loading && !input.trim() && attachments.length === 0) || attachmentUploading}
-              className={`send-btn ${(loading || (input.trim() || attachments.length > 0) && !attachmentUploading) ? 'active' : 'disabled'}`}
-            >
-              {loading ? <Square size={14} fill="currentColor" /> : <Send size={14} />}
-              {loading ? '停止' : (attachmentUploading ? '上传中' : '发送')}
-            </button>
+             <div className="input-tools-right" style={{ display: 'flex', gap: '8px' }}>
+               {/* 提示词优化按钮 */}
+               <button
+                 className={`optimize-btn ${input.trim() && !isOptimizing && !loading ? 'active' : 'disabled'}`}
+                 onClick={handleOptimizePrompt}
+                 disabled={!input.trim() || isOptimizing || loading}
+                 title="优化提示词"
+               >
+                 <Sparkles size={16} className={isOptimizing ? 'spin-anim' : ''} />
+               </button>
+
+               {/* 发送/停止按钮 */}
+               <button
+                 className={`send-btn ${input.trim() || attachments.length || loading ? 'active' : 'disabled'}`}
+                 onClick={loading ? stopGenerate : handleSend}
+                 disabled={(!loading && !input.trim() && attachments.length === 0) || attachmentUploading}
+               >
+                 {loading ? (
+                   <>
+                     <Square size={14} fill="currentColor" />
+                     <span>停止</span>
+                   </>
+                 ) : (
+                   <>
+                     <Send size={14} />
+                     <span>发送</span>
+                   </>
+                 )}
+               </button>
+             </div>
           </div>
           {!!attachments.length && (
             <div className="attachment-preview-list">

@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Trash2, Menu, Cpu } from 'lucide-react'
+import { Plus, MessageSquare, Trash2, Menu, Cpu, Sun, Moon } from 'lucide-react'
 import './index.css'
 
 /**
@@ -12,8 +12,10 @@ import './index.css'
  * @param {boolean} isOpen 侧边栏是否展开
  * @param {Function} onClose 切换侧边栏状态回调
  * @param {Function} onOpenSkills 打开技能管理回调
+ * @param {string} theme 当前主题 ('light' | 'dark')
+ * @param {Function} onToggleTheme 切换主题回调
  */
-export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete, isOpen, onClose, onOpenSkills }) {
+export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete, isOpen, onClose, onOpenSkills, theme, onToggleTheme }) {
   return (
     <div className={`sidebar-container ${isOpen ? 'open' : 'closed'}`}>
       {/* 顶部折叠按钮 */}
@@ -92,7 +94,28 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
         <div className="footer-avatar">
           AI
         </div>
-        {isOpen && '运维助手 (Ops)'}
+        {isOpen && (
+          <>
+            <span style={{ flex: 1 }}>运维助手 (Ops)</span>
+            <button 
+              className="theme-toggle-btn" 
+              onClick={onToggleTheme}
+              title={theme === 'dark' ? '切换为亮色模式' : '切换为暗色模式'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+          </>
+        )}
+        {!isOpen && (
+          <button 
+            className="theme-toggle-btn collapsed" 
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? '切换为亮色模式' : '切换为暗色模式'}
+            style={{ marginTop: '12px' }}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        )}
       </div>
     </div>
   )
