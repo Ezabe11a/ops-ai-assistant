@@ -1,4 +1,4 @@
-# 🚀 Ops AI Assistant (运维助手)
+# ![alt text](public/pig-nose.svg) Ops AI Assistant (运维助手)
 
 [![React](https://img.shields.io/badge/React-19.2-blue.svg?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7.3-646CFF.svg?logo=vite)](https://vitejs.dev/)
