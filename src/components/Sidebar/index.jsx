@@ -92,7 +92,7 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
       {/* 底部用户信息 */}
       <div className={`sidebar-footer ${isOpen ? 'open' : 'closed'}`}>
         <div className="footer-avatar">
-          AI
+          <img src="/pig-nose.svg" alt="logo" style={{ width: '24px', height: '24px' }} />
         </div>
         {isOpen && (
           <>
