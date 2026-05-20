@@ -22,9 +22,9 @@
   --border-light: #f0f0f0;
   --border-focus: #d1d1d1;
 
-  --color-primary: #da7756;
-  --color-primary-hover: #c06548;
-  --color-primary-light: #fff9f7;
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: #eef2ff;
   
   --color-blue: #007aff;
   --color-blue-light: #f0f7ff;
@@ -57,9 +57,9 @@
   --border-light: #2d2d2d;
   --border-focus: #555555;
 
-  --color-primary: #da7756;
-  --color-primary-hover: #e07055;
-  --color-primary-light: #3a2a26;
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-light: #1e1b4b;
   
   --color-blue: #3b82f6;
   --color-blue-light: #1e293b;

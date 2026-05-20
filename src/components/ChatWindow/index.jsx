@@ -37,15 +37,60 @@ export default function ChatWindow({
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false)
   const [isOptimizing, setIsOptimizing] = useState(false)
   const textareaRef = useRef(null)
+  const inputWrapperRef = useRef(null)
+  const dragStartYRef = useRef(0)
+  const dragStartHeightRef = useRef(0)
+  const isDraggingRef = useRef(false)
 
-  // 监听输入内容变化，自动调整高度
+  const LINE_HEIGHT = 24 // 每行高度约 24px
+  const MIN_LINES = 1
+  const MAX_LINES = 10
+
+  // 初始化 textarea 高度为 2 行
   useEffect(() => {
     const textarea = textareaRef.current
     if (textarea) {
-      textarea.style.height = 'auto'
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px'
+      textarea.style.height = (LINE_HEIGHT * 2) + 'px'
     }
-  }, [input])
+  }, [])
+
+  const handleDragStart = (e) => {
+    isDraggingRef.current = true
+    dragStartYRef.current = e.clientY
+    const textarea = textareaRef.current
+    dragStartHeightRef.current = textarea ? parseInt(textarea.style.height || '24', 10) : LINE_HEIGHT
+    document.body.style.cursor = 'ns-resize'
+    document.body.style.userSelect = 'none'
+  }
+
+  useEffect(() => {
+    const handleDragMove = (e) => {
+      if (!isDraggingRef.current) return
+      const deltaY = dragStartYRef.current - e.clientY
+      const newHeight = dragStartHeightRef.current + deltaY
+      const lines = Math.round(newHeight / LINE_HEIGHT)
+      const clampedLines = Math.max(MIN_LINES, Math.min(MAX_LINES, lines))
+      const clampedHeight = clampedLines * LINE_HEIGHT
+      if (textareaRef.current) {
+        textareaRef.current.style.height = clampedHeight + 'px'
+      }
+    }
+
+    const handleDragEnd = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+      }
+    }
+
+    document.addEventListener('mousemove', handleDragMove)
+    document.addEventListener('mouseup', handleDragEnd)
+    return () => {
+      document.removeEventListener('mousemove', handleDragMove)
+      document.removeEventListener('mouseup', handleDragEnd)
+    }
+  }, [])
 
   const quickActions = [
     { icon: <Search size={14} />, label: '排查日志', text: '请帮我分析一下这条错误日志的原因：\n' },
@@ -139,7 +184,12 @@ export default function ChatWindow({
             ))}
           </div>
         )}
-        <div className="input-wrapper">
+        <div className="input-wrapper" ref={inputWrapperRef}>
+          <div
+            className="resize-handle"
+            onMouseDown={handleDragStart}
+            title="拖动调整高度"
+          />
           <textarea
             ref={textareaRef}
             value={input}

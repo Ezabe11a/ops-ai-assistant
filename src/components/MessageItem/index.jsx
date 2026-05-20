@@ -82,14 +82,20 @@ export default function MessageItem({ message, index, loading, onRefresh, onFeed
                   td: ({...props}) => (
                     <td className="markdown-td" {...props} />
                   ),
-                  code: ({inline, className, children, ...props}) => {
-                    return !inline ? (
-                      <div className="code-block-wrapper">
-                        <code className={`code-block ${className || ''}`} {...props}>
-                          {children}
-                        </code>
-                      </div>
-                    ) : (
+                  pre: ({children}) => (
+                    <>{children}</>
+                  ),
+                  code: ({node, className, children, ...props}) => {
+                    if (className) {
+                      return (
+                        <div className="code-block-wrapper">
+                          <code className={`code-block ${className}`} {...props}>
+                            {children}
+                          </code>
+                        </div>
+                      )
+                    }
+                    return (
                       <code className="inline-code" {...props}>
                         {children}
                       </code>

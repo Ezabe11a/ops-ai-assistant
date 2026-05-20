@@ -7,7 +7,7 @@ const SKILLS_STORAGE_KEY = 'chat_skills'
 
 const DEFAULT_OPS_SKILL = {
   id: 'default-ops-expert',
-  name: '运维专家 (内置)',
+  name: 'Lumiq 运维专家 (内置)',
   content: `你是一个专业的 IT 运维专家助手。你的目标是帮助用户解决服务器管理、自动化脚本编写、故障排查、云原生架构（K8s, Docker）、CI/CD 流水线以及网络安全等方面的问题。
 优先提供可执行的命令，并解释关键参数的含义。在给出具有破坏性的命令前发出明确的安全警告。回答风格简洁、专业。`,
   enabled: true,

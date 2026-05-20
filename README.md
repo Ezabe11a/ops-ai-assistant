@@ -1,4 +1,4 @@
-# 🐽 Ops AI Assistant (运维助手)
+# 🐽 Lumiq
 
 [![React](https://img.shields.io/badge/React-19.2-blue.svg?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7.3-646CFF.svg?logo=vite)](https://vitejs.dev/)
@@ -8,11 +8,11 @@
 这是一个基于 React 构建的现代化 AI 聊天助手应用，专为运维场景设计。界面风格参考 Claude，简洁高效，支持 Markdown 渲染、代码高亮、流式响应以及会话历史管理。
 
 > [!TIP]
-> 运维助手的核心优势在于“技能增强”功能，可以通过简单的 Markdown 文件定义 AI 的专业能力。
+> Lumiq 的核心优势在于"技能增强"功能，可以通过简单的 Markdown 文件定义 AI 的专业能力。
 
 <!-- 屏幕截图占位符 -->
 <!-- <p align="center">
-  <img src="path/to/screenshot.png" alt="Ops AI Assistant Screenshot" width="800">
+  <img src="path/to/screenshot.png" alt="Lumiq Screenshot" width="800">
 </p> -->
 
 ## ✨ 功能特性
@@ -20,7 +20,7 @@
 - **专属运维场景**：内置专业的运维专家 Prompt，针对服务器管理、K8s、Docker、脚本编写、网络安全等场景进行调优。空状态提供快速操作卡片（如日志分析、安全审计等）。
 - **深度思考模式 (DeepSeek-R1)**：支持一键开启深度思考模型，展示 AI 解决问题的完整逻辑推理过程（Reasoning Process），并在界面外置显示。
 - **多模型无缝切换**：支持在通用模型（如 Qwen）和深度思考模型（如 DeepSeek-R1）之间快速切换，满足不同复杂度任务的需求。
-- **动态技能管理 (Skills)**：通过上传 `.txt` 或 `.md` 文件定义 AI 的专属“技能”，启用后自动注入 System Prompt，灵活扩展 AI 在特定领域的专业能力。
+- **动态技能管理 (Skills)**：通过上传 `.txt` 或 `.md` 文件定义 AI 的专属"技能"，启用后自动注入 System Prompt，灵活扩展 AI 在特定领域的专业能力。
 - **多会话管理**：支持创建新对话、保存历史记录、删除对话。
 - **灵活的交互与重试**：
   - 支持随时停止正在生成的回答。
@@ -51,7 +51,7 @@
 
 ```bash
 git clone <repository-url>
-cd ops-ai-assistant
+cd lumiq
 ```
 
 ### 2. 安装依赖

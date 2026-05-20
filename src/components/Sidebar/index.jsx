@@ -92,11 +92,11 @@ export default function Sidebar({ sessions, currentId, onSelect, onNew, onDelete
       {/* 底部用户信息 */}
       <div className={`sidebar-footer ${isOpen ? 'open' : 'closed'}`}>
         <div className="footer-avatar">
-          <img src="/pig-nose.svg" alt="logo" style={{ width: '24px', height: '24px' }} />
+          <span style={{ fontSize: '24px', lineHeight: 1 }}>🐽</span>
         </div>
         {isOpen && (
           <>
-            <span style={{ flex: 1 }}>运维助手 (Ops)</span>
+            <span style={{ flex: 1 }}>Lumiq</span>
             <button 
               className="theme-toggle-btn" 
               onClick={onToggleTheme}
